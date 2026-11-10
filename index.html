@@ -1,432 +1,209 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jurassic Dino Runner 🦖🌋</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🥠 Imperial Casino Fortune Roulette 4K - Coin & Quest System</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@600;700;800;900&family=Nunito:wght@400;600;700;800&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="game-container">
-    <div class="header">
-      <div class="title">
-        <span class="dino-emoji">🦖</span>
-        <span class="title-gradient">JURASSIC DINO RUNNER</span>
-      </div>
-      <div class="scores">
-        <span class="coin-label">🪙 COINS: <strong id="coin-score">0</strong></span>
-        <span class="hi-label">🏆 HI <strong id="high-score">00000</strong></span>
-        <span class="score-label" id="score-container">⭐ <strong id="score">00000</strong></span>
-        <button id="shop-open-btn" type="button" class="header-shop-btn">🛒 SHOP</button>
-      </div>
-    </div>
+  <!-- Casino Lighting FX -->
+  <div class="casino-spotlight"></div>
+  <div class="felt-tabletop"></div>
+  <canvas id="confetti-canvas"></canvas>
 
-    <!-- Dinosaur Skin Selector Bar -->
-    <div class="skin-selector-panel">
-      <div class="skin-label">🦖 CHOOSE SKIN:</div>
-      <div class="skin-buttons-wrap">
-        <button type="button" class="skin-btn active" data-skin="emerald">
-          <span class="skin-dot" style="background: linear-gradient(135deg, #15803d, #22c55e);"></span>
-          Emerald Raptor
-        </button>
-        <button type="button" class="skin-btn" data-skin="lava">
-          <span class="skin-dot" style="background: linear-gradient(135deg, #b91c1c, #f97316);"></span>
-          Volcanic Flame <span class="lock-indicator" id="lock-lava"></span>
-        </button>
-        <button type="button" class="skin-btn" data-skin="cyber">
-          <span class="skin-dot" style="background: linear-gradient(135deg, #0284c7, #38bdf8);"></span>
-          Cyberpunk Neon <span class="lock-indicator" id="lock-cyber"></span>
-        </button>
-        <button type="button" class="skin-btn" data-skin="golden">
-          <span class="skin-dot" style="background: linear-gradient(135deg, #eab308, #fef08a);"></span>
-          Golden Sovereign <span class="lock-indicator" id="lock-golden"></span>
-        </button>
-        <button type="button" class="skin-btn" data-skin="albino">
-          <span class="skin-dot" style="background: linear-gradient(135deg, #cbd5e1, #ffffff); border: 1px solid #94a3b8;"></span>
-          Ghost Albino <span class="lock-indicator" id="lock-albino"></span>
-        </button>
-      </div>
-    </div>
+  <main class="app-container">
+    <header class="header">
+      <div class="casino-badge">★ GRAND IMPERIAL CASINO & LOTTERY ★</div>
+      <h1>Fortune Roulette</h1>
+      <p class="subtitle">Place your bets • Spin the ivory ball • Complete quests & build your coin vault (1 - 1,000+)</p>
 
-    <!-- Active Powerup Badges Banner -->
-    <div id="powerup-status" class="hidden">
-      <span id="powerup-icon">⚡</span>
-      <span id="powerup-text">SPEED BOOST</span>
-      <div id="powerup-bar-wrap">
-        <div id="powerup-bar"></div>
-      </div>
-    </div>
-
-    <!-- Roar Alert Banner -->
-    <div id="roar-banner" class="hidden">🔥 ROAR ACTIVATED! ALL OBSTACLES BLASTED! 🔥</div>
-
-    <!-- Biome / Weather Toast Banner -->
-    <div id="biome-banner" class="hidden">🌋 ENTERING VOLCANO ASH RUN!</div>
-
-    <div id="game-board" class="biome-prehistoric">
-      <!-- Sky Environment: Sun/Moon, Volcanic Mountains, Stars & Clouds -->
-      <div id="sky-celestial"></div>
-      <div id="volcano-bg"></div>
-      <div id="mountain-bg"></div>
-      <div id="stars-layer"></div>
-      <div id="clouds-layer"></div>
-      
-      <!-- Particle effects canvas -->
-      <canvas id="fx-canvas"></canvas>
-
-      <!-- Realistic Anatomical T-Rex Sprite with dynamic Skin classes -->
-      <div id="dino" class="running skin-emerald">
-        <!-- Shield bubble aura (when active) -->
-        <div id="shield-bubble"></div>
-
-        <!-- Realistic T-Rex Running Frame 1 (Left Leg Forward) -->
-        <svg class="dino-svg dino-run-1" viewBox="0 0 140 100">
-          <defs>
-            <linearGradient id="tRexSkin1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="var(--skin-color-start, #15803d)" />
-              <stop offset="45%" stop-color="var(--skin-color-mid, #16a34a)" />
-              <stop offset="100%" stop-color="var(--skin-color-end, #047857)" />
-            </linearGradient>
-            <linearGradient id="tRexBelly1" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="var(--belly-color-start, #fef08a)" />
-              <stop offset="100%" stop-color="var(--belly-color-end, #ca8a04)" />
-            </linearGradient>
-          </defs>
-
-          <!-- Back Leg (Retracted) -->
-          <g class="back-leg" opacity="0.8">
-            <path class="dino-leg-back" d="M72 52 Q84 62 76 74 Q70 82 72 90 L62 90 L64 78 Q66 65 62 55 Z" fill="var(--skin-dark, #0f5132)"/>
-            <polygon class="dino-foot-back" points="60,90 75,90 71,94 58,94" fill="var(--skin-darker, #064e3b)"/>
-          </g>
-
-          <!-- Long Muscular Tail with Dorsal Ridge Spines -->
-          <path class="dino-tail" d="M4 34 Q20 37 40 42 Q58 46 68 38 Q48 56 26 50 Q10 44 4 34 Z" fill="url(#tRexSkin1)"/>
-          <polygon class="dino-spine" points="12,34 16,30 20,36" fill="var(--spine-color, #14532d)"/>
-          <polygon class="dino-spine" points="24,37 28,32 32,39" fill="var(--spine-color, #14532d)"/>
-          <polygon class="dino-spine" points="36,40 40,35 44,42" fill="var(--spine-color, #14532d)"/>
-          <polygon class="dino-spine" points="48,43 53,38 58,45" fill="var(--spine-color, #14532d)"/>
-          <polygon class="dino-spine" points="62,40 66,35 70,42" fill="var(--spine-color, #14532d)"/>
-
-          <!-- Muscular Torso & Flank -->
-          <path class="dino-torso" d="M42 42 Q58 35 78 30 Q92 28 98 34 Q86 64 64 62 Q50 60 42 42 Z" fill="url(#tRexSkin1)"/>
-          <path class="dino-belly" d="M52 50 Q66 56 78 52 Q76 60 66 61 Q56 60 52 50 Z" fill="url(#tRexBelly1)"/>
-
-          <!-- Neck & Massive Predatory Skull -->
-          <path class="dino-head" d="M82 32 Q92 22 108 14 Q128 10 136 18 Q138 28 132 34 L110 36 Q98 42 88 40 Z" fill="url(#tRexSkin1)"/>
-          <path class="dino-jaw" d="M110 36 L134 33 Q132 40 120 42 L104 40 Z" fill="var(--skin-color-start, #15803d)"/>
-          <!-- Teeth -->
-          <polygon points="112,35 114,39 116,35 118,39 120,35 122,39 124,35 126,39 128,35" fill="#ffffff"/>
-          <polygon points="114,40 116,36 118,40 120,36 122,40 124,36" fill="#ffffff"/>
-          <!-- Eye & Brow Ridge -->
-          <path d="M114 16 Q122 15 124 20" stroke="var(--skin-darker, #064e3b)" stroke-width="2.5" fill="none"/>
-          <circle cx="118" cy="20" r="4" fill="var(--eye-color, #fbbf24)"/>
-          <ellipse cx="118.5" cy="20" rx="1.2" ry="3.2" fill="#0f172a"/>
-          <circle cx="132" cy="21" r="1.5" fill="var(--skin-darker, #064e3b)"/>
-
-          <!-- Arm & Claws -->
-          <path class="dino-arm" d="M92 42 Q98 46 96 52 L91 55 L93 50 Z" fill="var(--skin-color-mid, #16a34a)"/>
-          <polygon points="96,52 100,53 97,54" fill="#f8fafc"/>
-          <polygon points="94,54 97,56 94,56" fill="#f8fafc"/>
-
-          <!-- Front Leg (Step 1) -->
-          <g class="front-leg">
-            <ellipse class="dino-thigh" cx="70" cy="52" rx="12" ry="16" transform="rotate(15 70 52)" fill="var(--skin-color-start, #15803d)"/>
-            <path class="dino-calf" d="M68 64 Q64 74 60 84 Q58 88 56 92 L72 92 L70 82 Q74 72 73 64 Z" fill="var(--skin-color-mid, #16a34a)"/>
-            <polygon points="52,92 58,88 56,95" fill="var(--claw-color, #0f172a)"/>
-            <polygon points="58,95 66,90 64,95" fill="var(--claw-color, #0f172a)"/>
-            <polygon points="66,95 74,90 72,95" fill="var(--claw-color, #0f172a)"/>
-          </g>
-        </svg>
-
-        <!-- Realistic T-Rex Running Frame 2 (Right Leg Forward) -->
-        <svg class="dino-svg dino-run-2" viewBox="0 0 140 100">
-          <defs>
-            <linearGradient id="tRexSkin2" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="var(--skin-color-start, #15803d)" />
-              <stop offset="45%" stop-color="var(--skin-color-mid, #16a34a)" />
-              <stop offset="100%" stop-color="var(--skin-color-end, #047857)" />
-            </linearGradient>
-            <linearGradient id="tRexBelly2" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="var(--belly-color-start, #fef08a)" />
-              <stop offset="100%" stop-color="var(--belly-color-end, #ca8a04)" />
-            </linearGradient>
-          </defs>
-
-          <!-- Back Leg -->
-          <g class="back-leg" opacity="0.8">
-            <path class="dino-leg-back" d="M66 52 Q60 65 58 76 Q54 84 52 90 L64 90 L68 80 Q70 66 72 54 Z" fill="var(--skin-dark, #0f5132)"/>
-            <polygon class="dino-foot-back" points="50,90 65,90 60,94 48,94" fill="var(--skin-darker, #064e3b)"/>
-          </g>
-
-          <path class="dino-tail" d="M4 30 Q22 34 40 40 Q58 46 68 38 Q48 54 26 48 Q10 42 4 30 Z" fill="url(#tRexSkin2)"/>
-          <polygon class="dino-spine" points="12,31 16,27 20,33" fill="var(--spine-color, #14532d)"/>
-          <polygon class="dino-spine" points="24,34 28,29 32,36" fill="var(--spine-color, #14532d)"/>
-          <polygon class="dino-spine" points="36,37 40,32 44,39" fill="var(--spine-color, #14532d)"/>
-          <polygon class="dino-spine" points="48,40 53,35 58,42" fill="var(--spine-color, #14532d)"/>
-
-          <path class="dino-torso" d="M42 40 Q58 33 78 30 Q92 28 98 34 Q86 64 64 62 Q50 60 42 40 Z" fill="url(#tRexSkin2)"/>
-          <path class="dino-belly" d="M52 48 Q66 54 78 50 Q76 58 66 59 Q56 58 52 48 Z" fill="url(#tRexBelly2)"/>
-
-          <!-- Head and open ferocious jaw -->
-          <path class="dino-head" d="M82 32 Q92 20 108 12 Q128 8 136 16 Q138 26 130 32 L108 34 Q98 40 88 38 Z" fill="url(#tRexSkin2)"/>
-          <path class="dino-jaw" d="M108 36 L134 35 Q130 44 118 45 L104 41 Z" fill="var(--skin-color-start, #15803d)"/>
-          <polygon points="112,33 114,37 116,33 118,37 120,33 122,37 124,33 126,37 128,33" fill="#ffffff"/>
-          <polygon points="114,43 116,39 118,43 120,39 122,43 124,39" fill="#ffffff"/>
-          <path d="M114 14 Q122 13 124 18" stroke="var(--skin-darker, #064e3b)" stroke-width="2.5" fill="none"/>
-          <circle cx="118" cy="18" r="4" fill="var(--eye-color, #fbbf24)"/>
-          <ellipse cx="118.5" cy="18" rx="1.2" ry="3.2" fill="#0f172a"/>
-          <circle cx="132" cy="19" r="1.5" fill="var(--skin-darker, #064e3b)"/>
-
-          <path class="dino-arm" d="M92 40 Q99 43 97 50 L92 53 L94 48 Z" fill="var(--skin-color-mid, #16a34a)"/>
-          <polygon points="97,50 101,51 98,52" fill="#f8fafc"/>
-          <polygon points="95,52 98,54 95,54" fill="#f8fafc"/>
-
-          <!-- Front Leg (Step 2) -->
-          <g class="front-leg">
-            <ellipse class="dino-thigh" cx="72" cy="50" rx="12" ry="16" transform="rotate(-15 72 50)" fill="var(--skin-color-start, #15803d)"/>
-            <path class="dino-calf" d="M72 62 Q78 72 82 82 Q84 86 86 92 L70 92 L72 82 Q70 70 68 62 Z" fill="var(--skin-color-mid, #16a34a)"/>
-            <polygon points="80,92 86,88 84,95" fill="var(--claw-color, #0f172a)"/>
-            <polygon points="74,95 80,90 78,95" fill="var(--claw-color, #0f172a)"/>
-            <polygon points="68,95 74,90 72,95" fill="var(--claw-color, #0f172a)"/>
-          </g>
-        </svg>
-
-        <!-- Realistic T-Rex Roaring Frame -->
-        <svg class="dino-svg dino-roar" viewBox="0 0 140 100">
-          <defs>
-            <linearGradient id="tRexRoarSkin" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="var(--skin-color-start, #15803d)" />
-              <stop offset="100%" stop-color="var(--skin-color-end, #047857)" />
-            </linearGradient>
-          </defs>
-          <path class="dino-tail" d="M4 36 Q22 38 40 42 Q58 46 68 38 Q48 56 26 50 Q10 44 4 36 Z" fill="url(#tRexRoarSkin)"/>
-          <path class="dino-torso" d="M42 42 Q58 35 78 30 Q92 28 98 34 Q86 64 64 62 Q50 60 42 42 Z" fill="url(#tRexRoarSkin)"/>
-          <path class="dino-head" d="M82 30 Q94 14 112 8 Q130 6 138 12 Q140 22 130 26 L108 30 Z" fill="var(--skin-color-start, #15803d)"/>
-          <path class="dino-jaw" d="M106 34 L138 48 Q132 58 116 54 L98 42 Z" fill="var(--skin-color-start, #15803d)"/>
-          <path d="M110 32 L128 38 L114 44 Z" fill="#ef4444"/>
-          <polygon points="114,26 117,31 120,26 123,31 126,26 129,31 132,26" fill="#ffffff"/>
-          <polygon points="112,42 115,37 118,42 121,37 124,42 127,37 130,42" fill="#ffffff"/>
-          <circle cx="120" cy="14" r="4.5" fill="var(--eye-color, #fbbf24)"/>
-          <ellipse cx="120.5" cy="14" rx="1.5" ry="3.5" fill="#000"/>
-          <path class="dino-calf" d="M68 60 Q64 74 60 88 L74 88 L72 74 Z" fill="var(--skin-color-start, #15803d)"/>
-          <polygon points="56,88 62,84 60,92" fill="var(--claw-color, #0f172a)"/>
-          <polygon points="62,92 70,87 68,92" fill="var(--claw-color, #0f172a)"/>
-          <polygon points="70,92 78,87 76,92" fill="var(--claw-color, #0f172a)"/>
-        </svg>
-
-        <!-- Realistic T-Rex Ducking Frame 1 -->
-        <svg class="dino-svg dino-duck-1" viewBox="0 0 160 70">
-          <defs>
-            <linearGradient id="tRexDuckSkin" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="var(--skin-color-start, #15803d)" />
-              <stop offset="60%" stop-color="var(--skin-color-mid, #16a34a)" />
-              <stop offset="100%" stop-color="var(--skin-color-end, #047857)" />
-            </linearGradient>
-          </defs>
-          <path class="dino-tail" d="M4 25 Q30 24 60 28 Q44 38 20 34 Q8 30 4 25 Z" fill="url(#tRexDuckSkin)"/>
-          <path class="dino-torso" d="M50 26 Q80 24 105 26 Q115 36 95 48 Q70 48 50 26 Z" fill="url(#tRexDuckSkin)"/>
-          <path class="dino-head" d="M102 26 Q120 22 144 24 Q154 28 152 38 L122 40 Q110 42 102 36 Z" fill="url(#tRexDuckSkin)"/>
-          <path class="dino-jaw" d="M122 40 L150 38 Q144 48 132 48 L116 44 Z" fill="var(--skin-color-start, #15803d)"/>
-          <polygon points="126,39 128,42 130,39 132,42 134,39 136,42 138,39" fill="#ffffff"/>
-          <circle cx="134" cy="28" r="3.5" fill="var(--eye-color, #fbbf24)"/>
-          <ellipse cx="134.5" cy="28" rx="1" ry="2.8" fill="#0f172a"/>
-          <path class="dino-calf" d="M75 42 Q85 45 80 62 L66 62 Q70 50 75 42 Z" fill="var(--skin-dark, #0f5132)"/>
-          <polygon points="62,62 82,62 76,66 60,66" fill="var(--claw-color, #0f172a)"/>
-        </svg>
-
-        <!-- Realistic T-Rex Ducking Frame 2 -->
-        <svg class="dino-svg dino-duck-2" viewBox="0 0 160 70">
-          <path class="dino-tail" d="M4 27 Q30 26 60 28 Q44 40 20 36 Q8 32 4 27 Z" fill="var(--skin-color-mid, #16a34a)"/>
-          <path class="dino-torso" d="M50 26 Q80 24 105 26 Q115 36 95 48 Q70 48 50 26 Z" fill="var(--skin-color-mid, #16a34a)"/>
-          <path class="dino-head" d="M102 26 Q120 22 144 24 Q154 28 152 38 L122 40 Q110 42 102 36 Z" fill="var(--skin-color-mid, #16a34a)"/>
-          <path class="dino-jaw" d="M122 40 L150 38 Q144 48 132 48 L116 44 Z" fill="var(--skin-color-start, #15803d)"/>
-          <polygon points="126,39 128,42 130,39 132,42 134,39 136,42 138,39" fill="#ffffff"/>
-          <circle cx="134" cy="28" r="3.5" fill="var(--eye-color, #fbbf24)"/>
-          <ellipse cx="134.5" cy="28" rx="1" ry="2.8" fill="#0f172a"/>
-          <path class="dino-calf" d="M72 42 Q82 48 76 62 L62 62 Q66 50 72 42 Z" fill="var(--skin-dark, #0f5132)"/>
-          <polygon points="58,62 78,62 72,66 56,66" fill="var(--claw-color, #0f172a)"/>
-        </svg>
-
-        <!-- Realistic Dead / Crashed T-Rex -->
-        <svg class="dino-svg dino-dead" viewBox="0 0 140 100">
-          <g opacity="0.95">
-            <path d="M10 50 Q40 45 68 55 Q90 62 100 68 Q75 80 50 75 Q25 70 10 50 Z" fill="#dc2626"/>
-            <path d="M96 66 Q115 68 132 75 Q135 84 125 90 L102 85 Z" fill="#b91c1c"/>
-            <polygon points="112,82 114,86 116,82 118,86 120,82" fill="#ffffff"/>
-            <line x1="116" y1="72" x2="124" y2="80" stroke="#ffffff" stroke-width="2.5"/>
-            <line x1="124" y1="72" x2="116" y2="80" stroke="#ffffff" stroke-width="2.5"/>
-            <path d="M55 68 Q65 78 60 92 L48 92 Q52 78 55 68 Z" fill="#991b1b"/>
-          </g>
-        </svg>
-      </div>
-
-      <!-- Colorful Grass & Dirt Ground -->
-      <div id="ground"></div>
-    </div>
-
-    <!-- On-screen mobile touch buttons with vibrant gradients -->
-    <div class="mobile-touch-bar">
-      <button id="touch-jump-btn" type="button">🚀 JUMP (▲)</button>
-      <button id="touch-duck-btn" type="button">🛡️ DUCK (▼)</button>
-      <button id="touch-roar-btn" type="button">📢 ROAR (R)</button>
-    </div>
-
-    <div id="game-over-screen" class="hidden">
-      <div class="game-over-icon">💥</div>
-      <h2>GAME OVER</h2>
-      <p id="game-over-summary">Hit an obstacle! Try to beat your high score!</p>
-      <div class="game-over-buttons">
-        <button id="restart-btn" type="button">🔄 PLAY AGAIN</button>
-        <button id="game-over-shop-btn" type="button" class="secondary-shop-btn">🛒 COIN SHOP</button>
-      </div>
-    </div>
-
-    <!-- ==========================================
-         COIN SHOP MODAL DIALOG
-         ========================================== -->
-    <div id="shop-modal" class="modal-overlay hidden">
-      <div class="shop-container">
-        <div class="shop-header">
-          <div class="shop-title">🛒 JURASSIC COIN SHOP</div>
-          <div class="shop-wallet">🪙 BALANCE: <strong id="shop-coins-display">0</strong></div>
-          <button id="shop-close-btn" type="button" class="close-btn" aria-label="Close Shop">✖</button>
+      <!-- Live Coin Vault & Quest Bar HUD -->
+      <div class="casino-hud-header">
+        <div class="hud-box coin-vault-box">
+          <span class="vault-icon">🪙</span>
+          <div class="vault-info">
+            <span class="hud-label">COIN VAULT</span>
+            <span class="hud-val" id="user-coins">500</span>
+          </div>
+          <button id="claim-daily-btn" class="mini-hud-btn" title="Claim 100 free coins">🎁 +100</button>
         </div>
 
-        <div class="shop-tabs">
-          <button type="button" class="shop-tab active" data-tab="items">⚡ POWERUP UPGRADES</button>
-          <button type="button" class="shop-tab" data-tab="skins">🦖 DINO SKINS</button>
+        <div class="hud-box bet-selector-box">
+          <span class="hud-label">CURRENT BET:</span>
+          <div class="bet-buttons">
+            <button class="bet-chip-btn active" data-bet="10">10</button>
+            <button class="bet-chip-btn" data-bet="50">50</button>
+            <button class="bet-chip-btn" data-bet="100">100</button>
+            <button class="bet-chip-btn" data-bet="250">250</button>
+          </div>
         </div>
 
-        <!-- Tab 1: Consumables & Perks -->
-        <div id="tab-items" class="shop-tab-content active">
-          <div class="shop-grid">
-            <!-- Item 1: Starter Shield -->
-            <div class="shop-card" id="card-item-shield">
-              <div class="card-icon">🛡️</div>
-              <div class="card-info">
-                <h3>Starter Forcefield</h3>
-                <p>Begin every single run with an active protective shield bubble!</p>
-                <div class="item-status" id="status-shield">Not Owned</div>
-              </div>
-              <button class="buy-btn" data-buy="starter_shield" data-cost="50">
-                🪙 50 COINS
-              </button>
-            </div>
+        <div class="hud-box quest-summary-box" id="quest-hud-toggle" title="Click to view all quests">
+          <span class="vault-icon">📜</span>
+          <div class="vault-info">
+            <span class="hud-label">ACTIVE QUESTS</span>
+            <span class="hud-val" id="quest-completed-count">0 / 5 Complete</span>
+          </div>
+          <span class="quest-glow-pill">View ▾</span>
+        </div>
+      </div>
+    </header>
 
-            <!-- Item 2: Coin Magnet -->
-            <div class="shop-card" id="card-item-magnet">
-              <div class="card-icon">🧲</div>
-              <div class="card-info">
-                <h3>Coin Magnetism</h3>
-                <p>Automatically vacuums and draws nearby golden coins toward the T-Rex!</p>
-                <div class="item-status" id="status-magnet">Not Owned</div>
+    <div class="game-layout">
+      <!-- 4K Ultra-Realistic Casino Roulette Section -->
+      <section class="wheel-section">
+        <div class="roulette-cabinet">
+          <!-- Mahogany Wooden Outer Bowl -->
+          <div class="wooden-turret-ring">
+            <div class="brass-track-ring">
+              <!-- High-Res 4K Canvas -->
+              <canvas id="roulette-canvas" width="1000" height="1000"></canvas>
+              
+              <!-- 3D Chrome Spindle Turret in the Center -->
+              <div class="turret-centerpiece" id="turret-centerpiece">
+                <div class="spindle-cone"></div>
+                <div class="spindle-handle handle-horizontal"></div>
+                <div class="spindle-handle handle-vertical"></div>
+                <button id="spin-btn" class="spin-btn" title="Spin Roulette">
+                  <span>SPIN</span>
+                </button>
               </div>
-              <button class="buy-btn" data-buy="coin_magnet" data-cost="80">
-                🪙 80 COINS
-              </button>
-            </div>
-
-            <!-- Item 3: 2x Coin Multiplier -->
-            <div class="shop-card" id="card-item-doublecoins">
-              <div class="card-icon">✨</div>
-              <div class="card-info">
-                <h3>Double Coin Multiplier</h3>
-                <p>Every coin collected on the trail awards 2x coins permanently!</p>
-                <div class="item-status" id="status-doublecoins">Not Owned</div>
-              </div>
-              <button class="buy-btn" data-buy="double_coins" data-cost="120">
-                🪙 120 COINS
-              </button>
-            </div>
-
-            <!-- Item 4: Instant Revive Heart -->
-            <div class="shop-card" id="card-item-revive">
-              <div class="card-icon">💖</div>
-              <div class="card-info">
-                <h3>Extra Life Revive</h3>
-                <p>Survive 1 fatal obstacle crash per run and keep running seamlessly!</p>
-                <div class="item-status" id="status-revive">Not Owned</div>
-              </div>
-              <button class="buy-btn" data-buy="extra_revive" data-cost="100">
-                🪙 100 COINS
-              </button>
             </div>
           </div>
         </div>
 
-        <!-- Tab 2: Premium Skins -->
-        <div id="tab-skins" class="shop-tab-content">
-          <div class="shop-grid">
-            <!-- Skin: Volcanic Flame -->
-            <div class="shop-card" id="card-skin-lava">
-              <div class="card-icon">🔥</div>
-              <div class="card-info">
-                <h3>Volcanic Flame T-Rex</h3>
-                <p>Molten lava crimson skin with glowing magma aura.</p>
-                <div class="item-status" id="status-skin-lava">Locked</div>
-              </div>
-              <button class="buy-btn" data-buy-skin="lava" data-cost="35">
-                🪙 35 COINS
-              </button>
+        <div class="betting-board-bar">
+          <div class="hud-status" id="wheel-status">
+            <span class="status-indicator live"></span>
+            <span id="status-text">BALL READY: Select a bet & tap <strong>SPIN</strong>!</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Fortune Cookie Stage & Bets -->
+      <section class="cookie-section">
+        <div class="payout-banner">
+          <div class="payout-title">CURRENT POCKET:</div>
+          <div class="category-badge" id="category-badge">Awaiting Ball Landing...</div>
+        </div>
+
+        <div class="cookie-stage" id="cookie-stage">
+          <div class="stage-spotlight"></div>
+          <div class="cookie-aura" id="cookie-aura"></div>
+
+          <!-- Realistic 3D Fortune Cookie -->
+          <div class="cookie-container" id="cookie-container" title="Click to crack open!">
+            <div class="cookie-half cookie-left" id="cookie-left">
+              <svg viewBox="0 0 110 130" class="cookie-svg">
+                <defs>
+                  <radialGradient id="cookie3DGradLeft" cx="30%" cy="30%" r="70%">
+                    <stop offset="0%" stop-color="#fff5cf" />
+                    <stop offset="25%" stop-color="#f5cc76" />
+                    <stop offset="65%" stop-color="#d49232" />
+                    <stop offset="85%" stop-color="#9e5d16" />
+                    <stop offset="100%" stop-color="#5a2d04" />
+                  </radialGradient>
+                  <filter id="shadowLeft" x="-30%" y="-30%" width="160%" height="160%">
+                    <feDropShadow dx="-4" dy="10" stdDeviation="6" flood-color="#000000" flood-opacity="0.8" />
+                  </filter>
+                </defs>
+                <path d="M 92,18 C 50,0 8,35 6,75 C 5,110 40,125 90,92 C 78,72 68,54 92,18 Z" 
+                      fill="url(#cookie3DGradLeft)" filter="url(#shadowLeft)" stroke="#683907" stroke-width="2.5"/>
+                <path d="M 52,42 Q 72,68 56,98" stroke="#5a2d04" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.75"/>
+                <path d="M 46,44 Q 65,68 50,96" stroke="#ffe39b" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.6"/>
+              </svg>
             </div>
 
-            <!-- Skin: Cyberpunk Neon -->
-            <div class="shop-card" id="card-skin-cyber">
-              <div class="card-icon">⚡</div>
-              <div class="card-info">
-                <h3>Cyberpunk Neon T-Rex</h3>
-                <p>Electric cyan cyber body with hot neon magenta spines.</p>
-                <div class="item-status" id="status-skin-cyber">Locked</div>
+            <div class="fortune-slip" id="fortune-slip">
+              <div class="slip-header-ornament">◆ ★ CASINO ROYAL FORTUNE & REWARD ★ ◆</div>
+              <div class="slip-content">
+                <div class="slip-category" id="slip-category">Category</div>
+                <p class="slip-text" id="slip-text">"The wheel spins for those bold enough to believe."</p>
+                <div class="coin-payout-row">
+                  <span class="coin-reward-pill">🪙 +<span id="slip-coin-reward">150</span> Coins</span>
+                  <span class="slip-luck-badge" id="slip-multiplier">x2.5 Multiplier</span>
+                </div>
+                <div class="slip-meta">
+                  <div class="lucky-numbers" id="lucky-numbers">Lucky: 07, 18, 23, 42</div>
+                  <div class="lucky-score" id="lucky-score">Luck: ★★★★★</div>
+                </div>
               </div>
-              <button class="buy-btn" data-buy-skin="cyber" data-cost="60">
-                🪙 60 COINS
-              </button>
             </div>
 
-            <!-- Skin: Golden Sovereign -->
-            <div class="shop-card" id="card-skin-golden">
-              <div class="card-icon">👑</div>
-              <div class="card-info">
-                <h3>Golden Sovereign T-Rex</h3>
-                <p>Radiant imperial gold scales with ruby red eyes.</p>
-                <div class="item-status" id="status-skin-golden">Locked</div>
-              </div>
-              <button class="buy-btn" data-buy-skin="golden" data-cost="100">
-                🪙 100 COINS
-              </button>
+            <div class="cookie-half cookie-right" id="cookie-right">
+              <svg viewBox="0 0 110 130" class="cookie-svg">
+                <defs>
+                  <radialGradient id="cookie3DGradRight" cx="70%" cy="30%" r="70%">
+                    <stop offset="0%" stop-color="#fff5cf" />
+                    <stop offset="25%" stop-color="#f5cc76" />
+                    <stop offset="65%" stop-color="#d49232" />
+                    <stop offset="85%" stop-color="#9e5d16" />
+                    <stop offset="100%" stop-color="#5a2d04" />
+                  </radialGradient>
+                  <filter id="shadowRight" x="-30%" y="-30%" width="160%" height="160%">
+                    <feDropShadow dx="4" dy="10" stdDeviation="6" flood-color="#000000" flood-opacity="0.8" />
+                  </filter>
+                </defs>
+                <path d="M 18,18 C 60,0 102,35 104,75 C 105,110 70,125 20,92 C 32,72 42,54 18,18 Z" 
+                      fill="url(#cookie3DGradRight)" filter="url(#shadowRight)" stroke="#683907" stroke-width="2.5"/>
+                <path d="M 58,42 Q 38,68 54,98" stroke="#5a2d04" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.75"/>
+                <path d="M 64,44 Q 45,68 60,96" stroke="#ffe39b" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.6"/>
+              </svg>
             </div>
+          </div>
 
-            <!-- Skin: Ghost Albino -->
-            <div class="shop-card" id="card-skin-albino">
-              <div class="card-icon">👻</div>
-              <div class="card-info">
-                <h3>Ghost Albino T-Rex</h3>
-                <p>Ethereal pearl white beast with crimson spines and aura.</p>
-                <div class="item-status" id="status-skin-albino">Locked</div>
-              </div>
-              <button class="buy-btn" data-buy-skin="albino" data-cost="75">
-                🪙 75 COINS
-              </button>
-            </div>
+          <div class="cookie-prompt" id="cookie-prompt">
+            <span class="prompt-arrow">▾</span> Place bets and spin the wheel!
           </div>
         </div>
 
-        <div class="shop-footer">
-          <span>Collect coins during the run or activate <kbd>R</kbd> Roar for bonus points!</span>
-          <button id="shop-done-btn" type="button" class="shop-action-btn">DONE</button>
+        <!-- Controls -->
+        <div class="controls-row">
+          <button id="crack-btn" class="action-btn crack-btn" disabled>
+            🥠 Crack & Claim Coins
+          </button>
+          <button id="reset-btn" class="action-btn reset-btn">
+            🔄 New Round
+          </button>
+          <button id="quest-btn" class="action-btn quest-toggle-btn">
+            📜 Quests
+          </button>
+          <button id="history-toggle-btn" class="action-btn toggle-btn">
+            📜 Records (<span id="history-count">0</span>)
+          </button>
         </div>
+      </section>
+    </div>
+
+    <!-- Quests Panel / Modal -->
+    <div class="quests-drawer" id="quests-drawer">
+      <div class="quests-header">
+        <div class="q-title-group">
+          <h3>📜 Casino Fortune Quests</h3>
+          <span class="q-subtitle">Complete objectives to earn bonus coins from 10 to 1,000!</span>
+        </div>
+        <button id="close-quests-btn" class="close-history">✕</button>
+      </div>
+      <div class="quests-container" id="quests-container">
+        <!-- Dynamically rendered quest cards -->
       </div>
     </div>
 
-    <div class="controls-hint">
-      <div class="hint-keys">
-        <span><kbd>Space</kbd> / <kbd>&uarr;</kbd> Jump (Double Jump!)</span>
-        <span><kbd>&darr;</kbd> Duck</span>
-        <span><kbd>R</kbd> T-Rex Roar</span>
+    <!-- History Drawer -->
+    <aside class="history-drawer" id="history-drawer">
+      <div class="history-header">
+        <h3>📜 Winning Fortunes & Coin History</h3>
+        <button id="close-history-btn" class="close-history">✕</button>
       </div>
-      <button id="mute-btn" type="button">🔊 Sound: ON</button>
-    </div>
-  </div>
+      <div class="history-list" id="history-list">
+        <p class="empty-history">No winning fortunes recorded yet.</p>
+      </div>
+    </aside>
+  </main>
 
   <script src="script.js"></script>
 </body>

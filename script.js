@@ -1,1239 +1,936 @@
-// ==========================================
-// AUDIO SYNTHESIZER (8-bit arcade chords)
-// ==========================================
-const AudioController = (() => {
-  let ctx = null;
-  let muted = false;
+// 4K Ultra-Realistic Casino Roulette, Dynamic Coin Economy & Quest System
 
-  function init() {
-    if (!ctx) {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (AudioCtx) ctx = new AudioCtx();
-    }
-    if (ctx && ctx.state === 'suspended') {
-      ctx.resume();
-    }
-  }
+// 1. European Roulette Pockets Definition
+const CASINO_POCKETS = [
+  { num: '0',  category: 'Pure Luck',       color: '#068f3b', type: 'green', icon: '🍀', mult: 8 },
+  { num: '32', category: 'Wealth & Gold',   color: '#b01424', type: 'red',   icon: '💰', mult: 3 },
+  { num: '15', category: 'Wisdom & Mind',   color: '#1a1a1a', type: 'black', icon: '🦉', mult: 2 },
+  { num: '19', category: 'Love & Heart',    color: '#b01424', type: 'red',   icon: '❤️', mult: 2.5 },
+  { num: '4',  category: 'Career & Power',  color: '#1a1a1a', type: 'black', icon: '⚡', mult: 2 },
+  { num: '21', category: 'Adventure',       color: '#b01424', type: 'red',   icon: '🧭', mult: 3 },
+  { num: '2',  category: 'Health & Vital',  color: '#1a1a1a', type: 'black', icon: '🌿', mult: 2 },
+  { num: '25', category: 'Chaos & Secret',  color: '#b01424', type: 'red',   icon: '🎲', mult: 4 },
+  { num: '17', category: 'Pure Luck',       color: '#1a1a1a', type: 'black', icon: '🍀', mult: 2.5 },
+  { num: '34', category: 'Wealth & Gold',   color: '#b01424', type: 'red',   icon: '💰', mult: 3 },
+  { num: '6',  category: 'Wisdom & Mind',   color: '#1a1a1a', type: 'black', icon: '🦉', mult: 2 },
+  { num: '27', category: 'Love & Heart',    color: '#b01424', type: 'red',   icon: '❤️', mult: 2.5 },
+  { num: '13', category: 'Career & Power',  color: '#1a1a1a', type: 'black', icon: '⚡', mult: 2 },
+  { num: '36', category: 'Adventure',       color: '#b01424', type: 'red',   icon: '🧭', mult: 3 },
+  { num: '11', category: 'Health & Vital',  color: '#1a1a1a', type: 'black', icon: '🌿', mult: 2 },
+  { num: '30', category: 'Chaos & Secret',  color: '#b01424', type: 'red',   icon: '🎲', mult: 4 }
+];
 
-  function playJump(isDouble = false) {
-    if (muted || !ctx) return;
-    try {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      osc.type = isDouble ? 'sine' : 'triangle';
-      const startFreq = isDouble ? 420 : 260;
-      const endFreq = isDouble ? 950 : 750;
-
-      osc.frequency.setValueAtTime(startFreq, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(endFreq, ctx.currentTime + 0.12);
-
-      gain.gain.setValueAtTime(0.18, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start();
-      osc.stop(ctx.currentTime + 0.13);
-    } catch (e) {}
-  }
-
-  function playRoar() {
-    if (muted || !ctx) return;
-    try {
-      const now = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(90, now);
-      osc.frequency.linearRampToValueAtTime(190, now + 0.15);
-      osc.frequency.exponentialRampToValueAtTime(45, now + 0.55);
-
-      gain.gain.setValueAtTime(0.35, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start(now);
-      osc.stop(now + 0.55);
-
-      const bufferSize = ctx.sampleRate * 0.45;
-      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-      const data = buffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        data[i] = Math.random() * 2 - 1;
-      }
-      const noise = ctx.createBufferSource();
-      noise.buffer = buffer;
-
-      const filter = ctx.createBiquadFilter();
-      filter.type = 'bandpass';
-      filter.frequency.setValueAtTime(350, now);
-      filter.Q.setValueAtTime(1.5, now);
-
-      const noiseGain = ctx.createGain();
-      noiseGain.gain.setValueAtTime(0.4, now);
-      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
-
-      noise.connect(filter);
-      filter.connect(noiseGain);
-      noiseGain.connect(ctx.destination);
-
-      noise.start(now);
-      noise.stop(now + 0.45);
-    } catch (e) {}
-  }
-
-  function playSkinChange() {
-    if (muted || !ctx) return;
-    try {
-      const now = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(440, now);
-      osc.frequency.exponentialRampToValueAtTime(880, now + 0.12);
-      gain.gain.setValueAtTime(0.12, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.12);
-    } catch (e) {}
-  }
-
-  function playBuy() {
-    if (muted || !ctx) return;
-    try {
-      const now = ctx.currentTime;
-      // Cash register ding + ascending fanfare
-      const notes = [587.33, 880, 1174.66];
-      notes.forEach((freq, idx) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(freq, now + idx * 0.07);
-        gain.gain.setValueAtTime(0.16, now + idx * 0.07);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.18);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now + idx * 0.07);
-        osc.stop(now + idx * 0.07 + 0.18);
-      });
-    } catch (e) {}
-  }
-
-  function playCoin() {
-    if (muted || !ctx) return;
-    try {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(987.77, ctx.currentTime);
-      osc.frequency.setValueAtTime(1318.51, ctx.currentTime + 0.08);
-
-      gain.gain.setValueAtTime(0.15, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start();
-      osc.stop(ctx.currentTime + 0.25);
-    } catch (e) {}
-  }
-
-  function playPowerup() {
-    if (muted || !ctx) return;
-    try {
-      const notes = [440, 554.37, 659.25, 880];
-      notes.forEach((freq, idx) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.06);
-        gain.gain.setValueAtTime(0.14, ctx.currentTime + idx * 0.06);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.06 + 0.15);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(ctx.currentTime + idx * 0.06);
-        osc.stop(ctx.currentTime + idx * 0.06 + 0.15);
-      });
-    } catch (e) {}
-  }
-
-  function playScore() {
-    if (muted || !ctx) return;
-    try {
-      const now = ctx.currentTime;
-      const notes = [523.25, 659.25, 783.99, 1046.5];
-      notes.forEach((freq, idx) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, now + idx * 0.055);
-        gain.gain.setValueAtTime(0.12, now + idx * 0.055);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.055 + 0.1);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now + idx * 0.055);
-        osc.stop(now + idx * 0.055 + 0.1);
-      });
-    } catch (e) {}
-  }
-
-  function playHit() {
-    if (muted || !ctx) return;
-    try {
-      const bufferSize = ctx.sampleRate * 0.35;
-      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-      const data = buffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        data[i] = Math.random() * 2 - 1;
-      }
-
-      const noise = ctx.createBufferSource();
-      noise.buffer = buffer;
-
-      const filter = ctx.createBiquadFilter();
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(950, ctx.currentTime);
-      filter.frequency.linearRampToValueAtTime(40, ctx.currentTime + 0.35);
-
-      const gain = ctx.createGain();
-      gain.gain.setValueAtTime(0.35, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
-
-      noise.connect(filter);
-      filter.connect(gain);
-      gain.connect(ctx.destination);
-
-      noise.start();
-      noise.stop(ctx.currentTime + 0.35);
-    } catch (e) {}
-  }
-
-  function toggleMute() {
-    muted = !muted;
-    return muted;
-  }
-
-  return { init, playJump, playHit, playScore, playCoin, playPowerup, playRoar, playSkinChange, playBuy, toggleMute };
-})();
-
-// ==========================================
-// PARTICLE SYSTEM (Sparks & Dust & Fire)
-// ==========================================
-const canvas = document.getElementById('fx-canvas');
-const ctxFx = canvas.getContext('2d');
-let particles = [];
-
-function resizeCanvas() {
-  canvas.width = canvas.parentElement.clientWidth;
-  canvas.height = canvas.parentElement.clientHeight;
-}
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
-
-function addParticles(x, y, count = 8, color = '#facc15', speedRange = 3) {
-  for (let i = 0; i < count; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const speed = Math.random() * speedRange + 1;
-    particles.push({
-      x,
-      y,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed,
-      life: 1.0,
-      decay: 0.03 + Math.random() * 0.04,
-      size: 3 + Math.random() * 3,
-      color
-    });
-  }
-}
-
-function updateParticles(delta) {
-  ctxFx.clearRect(0, 0, canvas.width, canvas.height);
-  for (let i = particles.length - 1; i >= 0; i--) {
-    const p = particles[i];
-    p.x += p.vx * delta;
-    p.y += p.vy * delta;
-    p.life -= p.decay * delta;
-
-    if (p.life <= 0) {
-      particles.splice(i, 1);
-      continue;
-    }
-
-    ctxFx.save();
-    ctxFx.globalAlpha = p.life;
-    ctxFx.fillStyle = p.color;
-    ctxFx.beginPath();
-    ctxFx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
-    ctxFx.fill();
-    ctxFx.restore();
-  }
-}
-
-// ==========================================
-// GAME STATE & SAVED DATA
-// ==========================================
-const dino = document.getElementById('dino');
-const gameBoard = document.getElementById('game-board');
-const scoreDisplay = document.getElementById('score');
-const coinDisplay = document.getElementById('coin-score');
-const scoreContainer = document.getElementById('score-container');
-const highScoreDisplay = document.getElementById('high-score');
-const gameOverScreen = document.getElementById('game-over-screen');
-const restartBtn = document.getElementById('restart-btn');
-const muteBtn = document.getElementById('mute-btn');
-const ground = document.getElementById('ground');
-const cloudsLayer = document.getElementById('clouds-layer');
-const starsLayer = document.getElementById('stars-layer');
-const touchJumpBtn = document.getElementById('touch-jump-btn');
-const touchDuckBtn = document.getElementById('touch-duck-btn');
-const touchRoarBtn = document.getElementById('touch-roar-btn');
-const powerupStatus = document.getElementById('powerup-status');
-const powerupIcon = document.getElementById('powerup-icon');
-const powerupText = document.getElementById('powerup-text');
-const powerupBar = document.getElementById('powerup-bar');
-const roarBanner = document.getElementById('roar-banner');
-const biomeBanner = document.getElementById('biome-banner');
-const skinButtons = document.querySelectorAll('.skin-btn');
-
-// Shop elements
-const shopModal = document.getElementById('shop-modal');
-const shopOpenBtn = document.getElementById('shop-open-btn');
-const gameOverShopBtn = document.getElementById('game-over-shop-btn');
-const shopCloseBtn = document.getElementById('shop-close-btn');
-const shopDoneBtn = document.getElementById('shop-done-btn');
-const shopCoinsDisplay = document.getElementById('shop-coins-display');
-const shopTabs = document.querySelectorAll('.shop-tab');
-const shopTabContents = document.querySelectorAll('.shop-tab-content');
-
-// Load stored bank, high score, inventory & skin
-let totalCoins = 0;
-let highScore = 0;
-let currentSkin = 'emerald';
-let inventory = {
-  starter_shield: false,
-  coin_magnet: false,
-  double_coins: false,
-  extra_revive: false,
-  unlocked_skins: ['emerald']
+const FORTUNES_DATA = {
+  'Pure Luck': [
+    "Miracles don't knock; they walk right in when you leave faith's door open.",
+    "The dice of the cosmos are loaded in your favor today. Bet on yourself.",
+    "A rare streak of serendipity is starting right now.",
+    "Jackpot energy surrounds your upcoming venture!"
+  ],
+  'Wealth & Gold': [
+    "A steady stream of prosperity follows disciplined ambition.",
+    "An overlooked asset will soon prove worth ten times its apparent value.",
+    "Wealth is not just in gold, but in knowing when you already have enough to win.",
+    "Opportunities multiply as they are seized—watch your ledger blossom."
+  ],
+  'Wisdom & Mind': [
+    "The grandmaster makes few moves, but every piece commands the board.",
+    "Stillness cuts through panic faster than haste.",
+    "Look past the noise of the table; observe the quiet patterns.",
+    "To understand all is to command your destiny."
+  ],
+  'Love & Heart': [
+    "A genuine smile given today will ignite a spark of everlasting warmth.",
+    "You don't need a winning hand when you have someone who bets on you.",
+    "A heartfelt conversation under evening lights will clear an old mystery.",
+    "True love is the ultimate prize that never loses value."
+  ],
+  'Career & Power': [
+    "Your quiet dedication is about to earn a standing ovation from leadership.",
+    "Step up to the center table; the spotlight was built for your craft.",
+    "A brilliant tactical move this week will dissolve an old obstacle.",
+    "Authority comes not from loud demands, but unwavering consistency."
+  ],
+  'Adventure': [
+    "A journey to an unfamiliar town holds the breakthrough you've dreamed of.",
+    "Routine is comfortable, but daring makes the gambler's blood rush with joy.",
+    "Pack your courage; an unscripted detour will become your best memory.",
+    "The horizon is whispering your name—answer it."
+  ],
+  'Health & Vital': [
+    "Rest is not surrender; it is the pit-stop before the championship lap.",
+    "Drink clean water, walk beneath the open sky, and reclaim your inner fire.",
+    "Your energy is rejuvenating—listen to the rhythm of your own strength.",
+    "A calm body houses an unbeatable mind."
+  ],
+  'Chaos & Secret': [
+    "A completely unexpected twist at 4 o'clock will turn your day into gold.",
+    "An odd coincidence will open a door that was locked for three years.",
+    "Expect the bizarre. Embrace the strange. Play the wildcard!",
+    "What looked like a mistake was actually fate reorganizing the game."
+  ]
 };
 
-try {
-  const savedCoins = localStorage.getItem('dino_bank_coins');
-  if (savedCoins) totalCoins = parseInt(savedCoins, 10) || 0;
+// 2. Coin Economy & Quest System State (Ranges from 1 to 1000+)
+const playerEconomy = {
+  coins: 500, // Starting bankroll
+  currentBet: 10,
+  stats: {
+    totalSpins: 0,
+    totalCracked: 0,
+    redHits: 0,
+    blackHits: 0,
+    greenHits: 0,
+    coinsWon: 0,
+    highStakeSpins: 0
+  }
+};
 
-  const savedHi = localStorage.getItem('dino_jurassic_hi');
-  if (savedHi) highScore = parseInt(savedHi, 10) || 0;
+// Quests covering numbers ranging from 1 to 1000 coins in rewards and goals
+const casinoQuests = [
+  {
+    id: 'first_spin',
+    title: 'Beginner Gambler',
+    desc: 'Spin the roulette wheel for the first time.',
+    target: 1,
+    current: 0,
+    rewardCoins: 50,
+    isCompleted: false,
+    isClaimed: false,
+    checkProgress: (state) => state.stats.totalSpins
+  },
+  {
+    id: 'crack_three',
+    title: 'Fortune Hunter',
+    desc: 'Crack open 3 fortune cookies.',
+    target: 3,
+    current: 0,
+    rewardCoins: 120,
+    isCompleted: false,
+    isClaimed: false,
+    checkProgress: (state) => state.stats.totalCracked
+  },
+  {
+    id: 'red_streak',
+    title: 'Lady in Red',
+    desc: 'Hit a RED pocket 2 times.',
+    target: 2,
+    current: 0,
+    rewardCoins: 250,
+    isCompleted: false,
+    isClaimed: false,
+    checkProgress: (state) => state.stats.redHits
+  },
+  {
+    id: 'high_roller',
+    title: 'High Roller Bet',
+    desc: 'Place a high-stake bet (100 coins or more) on the wheel.',
+    target: 1,
+    current: 0,
+    rewardCoins: 400,
+    isCompleted: false,
+    isClaimed: false,
+    checkProgress: (state) => state.stats.highStakeSpins
+  },
+  {
+    id: 'fortune_grandmaster',
+    title: 'Imperial Grandmaster',
+    desc: 'Spin the wheel 10 times to test true fate.',
+    target: 10,
+    current: 0,
+    rewardCoins: 1000, // 1000 Coins Quest Jackpot!
+    isCompleted: false,
+    isClaimed: false,
+    checkProgress: (state) => state.stats.totalSpins
+  }
+];
 
-  const savedInv = localStorage.getItem('dino_player_inventory');
-  if (savedInv) inventory = JSON.parse(savedInv);
-
-  const savedSkin = localStorage.getItem('dino_selected_skin');
-  if (savedSkin) currentSkin = savedSkin;
-} catch (e) {}
-
-// Update UI initial counters
-coinDisplay.textContent = totalCoins;
-highScoreDisplay.textContent = String(highScore).padStart(5, '0');
-
-let isGameOver = false;
-let isShopOpen = false;
-let score = 0;
-let runCoins = 0;
-let lastMilestone = 0;
-let gameSpeed = 6.2;
-const maxSpeed = 14.5;
-let groundX = 0;
-
-let legStepTimer = 0;
-let isAltStep = false;
-
-// Physics & Jump
-let isJumping = false;
-let jumpCount = 0;
-let isDucking = false;
-let isRoaring = false;
-let roarTimer = 0;
-let dinoY = 0;
-let dinoVelocity = 0;
-const gravity = 0.62;
-const jumpStrength = 13.0;
-
-// Extra life revive state
-let hasReviveAvailable = false;
-
-// Powerup states
-let activePowerup = null; // 'shield' or 'star-boost'
-let powerupDuration = 0;
-let powerupMaxDuration = 0;
-
-// Obstacles, Collectibles, Clouds
-let obstacles = [];
-let collectibles = [];
-let clouds = [];
-let nextSpawnDistance = 350;
-let distanceSinceLastSpawn = 0;
-
-let isNight = false;
-
-const CACTUS_COLORS = ['#15803d', '#16a34a', '#059669', '#0d9488', '#0284c7'];
-const BIRD_COLORS = ['#ea580c', '#e11d48', '#d97706', '#9333ea', '#c026d3'];
-
-// Save inventory & wallet helpers
-function saveUserData() {
-  try {
-    localStorage.setItem('dino_bank_coins', totalCoins);
-    localStorage.setItem('dino_player_inventory', JSON.stringify(inventory));
-    localStorage.setItem('dino_selected_skin', currentSkin);
-  } catch (e) {}
-}
-
-// ==========================================
-// SKIN SYSTEM & LOCK STATUS
-// ==========================================
-function updateSkinButtonsLockState() {
-  skinButtons.forEach((btn) => {
-    const skinName = btn.dataset.skin;
-    const isUnlocked = inventory.unlocked_skins.includes(skinName);
-    const lockEl = document.getElementById(`lock-${skinName}`);
-    if (lockEl) {
-      lockEl.textContent = isUnlocked ? '' : '🔒';
-    }
-    btn.style.opacity = isUnlocked ? '1' : '0.6';
-  });
-}
-
-function setSkin(skinName) {
-  if (!inventory.unlocked_skins.includes(skinName)) {
-    openShop('skins');
-    return;
+// 3. Audio Synthesizer (Web Audio API)
+class CasinoAudioEngine {
+  constructor() {
+    this.ctx = null;
+    this.masterGain = null;
   }
 
-  currentSkin = skinName;
-  dino.classList.remove('skin-emerald', 'skin-lava', 'skin-cyber', 'skin-golden', 'skin-albino');
-  dino.classList.add(`skin-${skinName}`);
-
-  skinButtons.forEach((btn) => {
-    btn.classList.toggle('active', btn.dataset.skin === skinName);
-  });
-
-  saveUserData();
-  AudioController.playSkinChange();
-
-  const boardRect = gameBoard.getBoundingClientRect();
-  const dinoRect = dino.getBoundingClientRect();
-  const skinParticleColors = {
-    emerald: '#22c55e',
-    lava: '#f97316',
-    cyber: '#38bdf8',
-    golden: '#eab308',
-    albino: '#ffffff'
-  };
-  addParticles(
-    dinoRect.left - boardRect.left + 35,
-    dinoRect.top - boardRect.top + 25,
-    25,
-    skinParticleColors[skinName] || '#38bdf8',
-    5
-  );
-}
-
-skinButtons.forEach((btn) => {
-  btn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    AudioController.init();
-    setSkin(btn.dataset.skin);
-  });
-});
-
-updateSkinButtonsLockState();
-setSkin(currentSkin);
-
-// ==========================================
-// COIN SHOP LOGIC & TRANSACTIONS
-// ==========================================
-function openShop(defaultTab = 'items') {
-  isShopOpen = true;
-  shopModal.classList.remove('hidden');
-  shopCoinsDisplay.textContent = totalCoins;
-  switchShopTab(defaultTab);
-  refreshShopUI();
-}
-
-function closeShop() {
-  isShopOpen = false;
-  shopModal.classList.add('hidden');
-  updateSkinButtonsLockState();
-}
-
-function switchShopTab(tabKey) {
-  shopTabs.forEach((tab) => tab.classList.toggle('active', tab.dataset.tab === tabKey));
-  shopTabContents.forEach((content) => content.classList.toggle('active', content.id === `tab-${tabKey}`));
-}
-
-shopTabs.forEach((tab) => {
-  tab.addEventListener('click', () => switchShopTab(tab.dataset.tab));
-});
-
-function refreshShopUI() {
-  shopCoinsDisplay.textContent = totalCoins;
-
-  // 1. Items Statuses
-  const items = [
-    { id: 'shield', key: 'starter_shield' },
-    { id: 'magnet', key: 'coin_magnet' },
-    { id: 'doublecoins', key: 'double_coins' },
-    { id: 'revive', key: 'extra_revive' }
-  ];
-
-  items.forEach((item) => {
-    const isOwned = inventory[item.key];
-    const statusEl = document.getElementById(`status-${item.id}`);
-    const btn = document.querySelector(`[data-buy="${item.key}"]`);
-    if (statusEl) {
-      statusEl.textContent = isOwned ? '✓ Owned & Active' : 'Not Owned';
-      statusEl.classList.toggle('owned', isOwned);
-    }
-    if (btn) {
-      if (isOwned) {
-        btn.textContent = 'OWNED';
-        btn.disabled = true;
-      } else {
-        const cost = parseInt(btn.dataset.cost, 10);
-        btn.textContent = `🪙 ${cost} COINS`;
-        btn.disabled = totalCoins < cost;
+  init() {
+    if (!this.ctx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) {
+        this.ctx = new AudioCtx();
+        this.masterGain = this.ctx.createGain();
+        this.masterGain.gain.value = 0.8;
+        this.masterGain.connect(this.ctx.destination);
       }
     }
-  });
-
-  // 2. Skins Statuses
-  const skins = ['lava', 'cyber', 'golden', 'albino'];
-  skins.forEach((skinKey) => {
-    const isUnlocked = inventory.unlocked_skins.includes(skinKey);
-    const statusEl = document.getElementById(`status-skin-${skinKey}`);
-    const btn = document.querySelector(`[data-buy-skin="${skinKey}"]`);
-    if (statusEl) {
-      statusEl.textContent = isUnlocked ? '✓ Unlocked' : 'Locked';
-      statusEl.classList.toggle('owned', isUnlocked);
-    }
-    if (btn) {
-      if (isUnlocked) {
-        btn.textContent = currentSkin === skinKey ? 'EQUIPPED' : 'EQUIP';
-        btn.disabled = currentSkin === skinKey;
-      } else {
-        const cost = parseInt(btn.dataset.cost, 10);
-        btn.textContent = `🪙 ${cost} COINS`;
-        btn.disabled = totalCoins < cost;
-      }
-    }
-  });
-}
-
-// Purchase buttons
-document.querySelectorAll('[data-buy]').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    const itemKey = btn.dataset.buy;
-    const cost = parseInt(btn.dataset.cost, 10);
-    if (totalCoins >= cost && !inventory[itemKey]) {
-      totalCoins -= cost;
-      inventory[itemKey] = true;
-      saveUserData();
-      coinDisplay.textContent = totalCoins;
-      AudioController.playBuy();
-      refreshShopUI();
-    }
-  });
-});
-
-document.querySelectorAll('[data-buy-skin]').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    const skinKey = btn.dataset-buySkin || btn.getAttribute('data-buy-skin');
-    const isUnlocked = inventory.unlocked_skins.includes(skinKey);
-    const cost = parseInt(btn.dataset.cost, 10);
-
-    if (!isUnlocked && totalCoins >= cost) {
-      totalCoins -= cost;
-      inventory.unlocked_skins.push(skinKey);
-      setSkin(skinKey);
-      saveUserData();
-      coinDisplay.textContent = totalCoins;
-      AudioController.playBuy();
-      refreshShopUI();
-    } else if (isUnlocked) {
-      setSkin(skinKey);
-      refreshShopUI();
-    }
-  });
-});
-
-shopOpenBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  openShop('items');
-});
-
-gameOverShopBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  openShop('items');
-});
-
-shopCloseBtn.addEventListener('click', closeShop);
-shopDoneBtn.addEventListener('click', closeShop);
-
-// ==========================================
-// ENVIRONMENT & STARS
-// ==========================================
-function createStars() {
-  starsLayer.innerHTML = '';
-  for (let i = 0; i < 9; i++) {
-    const star = document.createElement('div');
-    star.className = 'star';
-    star.style.left = `${Math.floor(Math.random() * 88 + 4)}%`;
-    star.style.top = `${Math.floor(Math.random() * 80 + 15)}px`;
-    starsLayer.appendChild(star);
-  }
-}
-createStars();
-
-function setDucking(ducking) {
-  if (isGameOver || isRoaring || isShopOpen) return;
-  if (ducking) {
-    isDucking = true;
-    if (isJumping) {
-      dinoVelocity -= 1.3;
-    } else {
-      dino.classList.add('ducking');
-      dino.classList.remove('running', 'jumping');
-    }
-  } else {
-    isDucking = false;
-    dino.classList.remove('ducking');
-    if (!isJumping) dino.classList.add('running');
-  }
-}
-
-function jump() {
-  AudioController.init();
-  if (isShopOpen) return;
-  if (isGameOver) {
-    resetGame();
-    return;
-  }
-  if (isRoaring) return;
-
-  if (!isJumping && dinoY === 0) {
-    isJumping = true;
-    jumpCount = 1;
-    dinoVelocity = jumpStrength;
-    dino.classList.remove('running', 'ducking');
-    dino.classList.add('jumping');
-    AudioController.playJump(false);
-
-    const boardRect = gameBoard.getBoundingClientRect();
-    const dinoRect = dino.getBoundingClientRect();
-    addParticles(dinoRect.left - boardRect.left + 25, dinoRect.bottom - boardRect.top - 5, 6, '#86efac');
-  } else if (isJumping && jumpCount === 1) {
-    jumpCount = 2;
-    dinoVelocity = jumpStrength * 0.92;
-    AudioController.playJump(true);
-
-    const boardRect = gameBoard.getBoundingClientRect();
-    const dinoRect = dino.getBoundingClientRect();
-    addParticles(dinoRect.left - boardRect.left + 35, dinoRect.top - boardRect.top + 25, 10, '#38bdf8');
-  }
-}
-
-function roar() {
-  AudioController.init();
-  if (isGameOver || isRoaring || isShopOpen) return;
-
-  isRoaring = true;
-  roarTimer = 35;
-  dino.classList.add('roaring');
-  dino.classList.remove('running', 'ducking');
-  roarBanner.classList.remove('hidden');
-
-  AudioController.playRoar();
-
-  const boardRect = gameBoard.getBoundingClientRect();
-  const dinoRect = dino.getBoundingClientRect();
-  const muzzleX = dinoRect.left - boardRect.left + dinoRect.width;
-  const muzzleY = dinoRect.top - boardRect.top + 20;
-
-  for (let s = 0; s < 40; s++) {
-    particles.push({
-      x: muzzleX,
-      y: muzzleY + (Math.random() * 20 - 10),
-      vx: Math.random() * 12 + 4,
-      vy: (Math.random() - 0.5) * 5,
-      life: 1.0,
-      decay: 0.04,
-      size: 4 + Math.random() * 5,
-      color: Math.random() > 0.5 ? '#f97316' : '#ef4444'
-    });
-  }
-
-  for (let i = obstacles.length - 1; i >= 0; i--) {
-    const obs = obstacles[i];
-    const obsRect = obs.el.getBoundingClientRect();
-    addParticles(obsRect.left - boardRect.left + 20, obsRect.top - boardRect.top + 20, 15, '#f97316', 5);
-    obs.el.remove();
-    obstacles.splice(i, 1);
-  }
-
-  score += 50;
-}
-
-function activatePowerup(type) {
-  activePowerup = type;
-  powerupMaxDuration = type === 'shield' ? 450 : 350;
-  powerupDuration = powerupMaxDuration;
-
-  AudioController.playPowerup();
-
-  if (type === 'shield') {
-    dino.classList.add('has-shield');
-    powerupIcon.textContent = '🛡️';
-    powerupText.textContent = 'SHIELD ACTIVE (INVULNERABLE)';
-  } else if (type === 'star-boost') {
-    powerupIcon.textContent = '⚡';
-    powerupText.textContent = 'SPEED BOOST (2X POINTS)';
-  }
-  powerupStatus.classList.remove('hidden');
-}
-
-function spawnCloud() {
-  const cloud = document.createElement('div');
-  cloud.className = 'cloud';
-  const width = Math.floor(Math.random() * 30) + 40;
-  const top = Math.floor(Math.random() * 65) + 20;
-  cloud.style.width = `${width}px`;
-  cloud.style.top = `${top}px`;
-  cloud.style.right = '-70px';
-  cloudsLayer.appendChild(cloud);
-  clouds.push({ el: cloud, x: -70, speed: 0.7 + Math.random() * 0.7 });
-}
-
-function spawnCoinOrPowerup() {
-  if (Math.random() > 0.45) return;
-
-  const isPowerup = Math.random() < 0.22 && !activePowerup;
-  const itemEl = document.createElement('div');
-
-  const heights = [28, 65, 105];
-  const bottom = heights[Math.floor(Math.random() * heights.length)];
-
-  if (isPowerup) {
-    const pType = Math.random() < 0.5 ? 'shield' : 'star-boost';
-    itemEl.className = `powerup-item ${pType}`;
-    itemEl.textContent = pType === 'shield' ? '🛡️' : '⚡';
-    itemEl.style.bottom = `${bottom}px`;
-    itemEl.style.right = '-35px';
-    gameBoard.appendChild(itemEl);
-    collectibles.push({ el: itemEl, type: pType, x: -35, width: 26, height: 26, bottom });
-  } else {
-    itemEl.className = 'coin';
-    itemEl.textContent = '$';
-    itemEl.style.bottom = `${bottom}px`;
-    itemEl.style.right = '-30px';
-    gameBoard.appendChild(itemEl);
-    collectibles.push({ el: itemEl, type: 'coin', x: -30, width: 22, height: 22, bottom });
-  }
-}
-
-function spawnObstacle() {
-  const canSpawnBird = score > 200 && Math.random() > 0.65;
-  const obsEl = document.createElement('div');
-
-  let type = 'cactus';
-  let width = 24;
-  let height = 44;
-  let bottom = 0;
-
-  if (canSpawnBird) {
-    type = 'pterodactyl';
-    obsEl.className = 'pterodactyl wing-up';
-    const birdColor = BIRD_COLORS[Math.floor(Math.random() * BIRD_COLORS.length)];
-    obsEl.innerHTML = `
-      <svg class="ptero-svg ptero-wing-up" viewBox="0 0 92 80" fill="${birdColor}">
-        <path d="M50 0h12v12H50zm12 12h12v12H62zm12 12h18v12H74zm-36 0h12v12H38zm-12 12h12v12H26zm-16 0h8v8h-8zm24 12h24v12H34zm-8 12h8v12h-8z"/>
-        <rect x="74" y="24" width="6" height="6" fill="#fff"/>
-        <rect x="76" y="25" width="2" height="2" fill="#000"/>
-      </svg>
-      <svg class="ptero-svg ptero-wing-down" viewBox="0 0 92 80" fill="${birdColor}">
-        <path d="M50 24h12v12H50zm12 12h12v12H62zm12 0h18v12H74zm-36 0h12v12H38zm-12 12h12v12H26zm-16-12h8v8h-8zm24-12h24v12H34zm-8 24h8v12h-8zm16 12h12v12H42z"/>
-        <rect x="74" y="36" width="6" height="6" fill="#fff"/>
-        <rect x="76" y="37" width="2" height="2" fill="#000"/>
-      </svg>
-    `;
-    width = 48;
-    height = 38;
-    const birdHeights = [18, 55, 92];
-    bottom = birdHeights[Math.floor(Math.random() * birdHeights.length)];
-  } else {
-    obsEl.className = 'cactus';
-    const cactusColor = CACTUS_COLORS[Math.floor(Math.random() * CACTUS_COLORS.length)];
-    const cactusIdx = Math.floor(Math.random() * 3);
-
-    if (cactusIdx === 0) {
-      width = 22;
-      height = 44;
-      obsEl.innerHTML = `<svg class="cactus-svg" viewBox="0 0 20 40" fill="${cactusColor}">
-        <path d="M7 0h6v38H7zm8 10h5v12h-5zm-14 6h5v12H1z"/>
-        <circle cx="10" cy="3" r="3" fill="#ec4899"/>
-      </svg>`;
-    } else if (cactusIdx === 1) {
-      width = 38;
-      height = 48;
-      obsEl.innerHTML = `<svg class="cactus-svg" viewBox="0 0 38 46" fill="${cactusColor}">
-        <path d="M5 2h5v40H5zm12 10h5v14h-5zm11-6h5v38h-5zm-16 8H2v10h5zm22 6h5v10h-5z"/>
-        <circle cx="7" cy="4" r="2.5" fill="#f43f5e"/>
-        <circle cx="29" cy="6" r="2.5" fill="#eab308"/>
-      </svg>`;
-    } else {
-      width = 52;
-      height = 52;
-      obsEl.innerHTML = `<svg class="cactus-svg" viewBox="0 0 55 52" fill="${cactusColor}">
-        <path d="M6 4h6v44H6zm14 8h5v12h-5zm13-8h6v44h-6zm12 12h5v10h-5zm-33 6H1v12h5zm24 6h-5v12h5zm19-2h-5v12h5z"/>
-        <circle cx="9" cy="5" r="3" fill="#ec4899"/>
-        <circle cx="36" cy="5" r="3" fill="#f59e0b"/>
-      </svg>`;
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume();
     }
   }
 
-  obsEl.style.width = `${width}px`;
-  obsEl.style.height = `${height}px`;
-  obsEl.style.bottom = `${bottom}px`;
-  obsEl.style.right = `-${width + 10}px`;
-
-  gameBoard.appendChild(obsEl);
-  obstacles.push({
-    el: obsEl,
-    type,
-    x: -(width + 10),
-    width,
-    height,
-    bottom,
-    wingTimer: 0
-  });
-
-  spawnCoinOrPowerup();
-
-  const minGap = Math.max(220, gameSpeed * 34);
-  nextSpawnDistance = minGap + Math.random() * 270;
-  distanceSinceLastSpawn = 0;
-}
-
-// ==========================================
-// MAIN ANIMATION LOOP
-// ==========================================
-let lastTime = null;
-function gameLoop(time) {
-  if (lastTime === null) lastTime = time;
-  const delta = Math.min((time - lastTime) / 16.66, 2.5);
-  lastTime = time;
-
-  if (!isGameOver && !isShopOpen) {
-    const currentSpeed = activePowerup === 'star-boost' ? gameSpeed * 1.35 : gameSpeed;
-
-    // 1. Move Ground
-    groundX += currentSpeed * delta;
-    ground.style.transform = `translateX(-${groundX % 260}px)`;
-
-    // 2. Physics & Jump
-    if (isJumping || dinoY > 0) {
-      dinoY += dinoVelocity * delta;
-      dinoVelocity -= gravity * delta;
-
-      if (dinoY <= 0) {
-        dinoY = 0;
-        dinoVelocity = 0;
-        isJumping = false;
-        jumpCount = 0;
-        dino.classList.remove('jumping');
-        if (isDucking) dino.classList.add('ducking');
-        else if (!isRoaring) dino.classList.add('running');
-      }
-      dino.style.bottom = `${dinoY}px`;
-    }
-
-    // 3. Roar timer
-    if (isRoaring) {
-      roarTimer -= delta;
-      if (roarTimer <= 0) {
-        isRoaring = false;
-        dino.classList.remove('roaring');
-        roarBanner.classList.add('hidden');
-        if (isDucking) dino.classList.add('ducking');
-        else dino.classList.add('running');
-      }
-    }
-
-    // 4. Stride animation
-    legStepTimer += delta * (currentSpeed / 6.0);
-    if (legStepTimer >= 6.0) {
-      legStepTimer = 0;
-      isAltStep = !isAltStep;
-      dino.classList.toggle('alt-step', isAltStep);
-
-      if (!isJumping && !isDucking && !isRoaring) {
-        const boardRect = gameBoard.getBoundingClientRect();
-        const dinoRect = dino.getBoundingClientRect();
-        addParticles(dinoRect.left - boardRect.left + 22, dinoRect.bottom - boardRect.top - 6, 2, '#4ade80', 1.5);
-      }
-    }
-
-    // 5. Clouds
-    if (Math.random() < 0.007 && clouds.length < 5) {
-      spawnCloud();
-    }
-    for (let i = clouds.length - 1; i >= 0; i--) {
-      const c = clouds[i];
-      c.x += c.speed * delta;
-      c.el.style.right = `${c.x}px`;
-      if (c.x > gameBoard.clientWidth + 80) {
-        c.el.remove();
-        clouds.splice(i, 1);
-      }
-    }
-
-    // 6. Spawn & Move Obstacles
-    distanceSinceLastSpawn += currentSpeed * delta;
-    if (distanceSinceLastSpawn >= nextSpawnDistance) {
-      spawnObstacle();
-    }
-
-    const dinoRect = dino.getBoundingClientRect();
-    const dinoHitBox = {
-      left: dinoRect.left + (isDucking ? 8 : 14),
-      right: dinoRect.right - (isDucking ? 8 : 14),
-      top: dinoRect.top + (isDucking ? 6 : 10),
-      bottom: dinoRect.bottom - 4
-    };
-
-    // Coin Magnetism Perk Logic
-    if (inventory.coin_magnet) {
-      collectibles.forEach((item) => {
-        if (item.type === 'coin') {
-          const itemRect = item.el.getBoundingClientRect();
-          const dist = Math.hypot(
-            (itemRect.left + itemRect.width / 2) - (dinoRect.left + dinoRect.width / 2),
-            (itemRect.top + itemRect.height / 2) - (dinoRect.top + dinoRect.height / 2)
-          );
-          if (dist < 180) {
-            // Magnet pull toward dino
-            item.x += 4.5 * delta;
-            item.bottom += (dinoY - item.bottom) * 0.06 * delta;
-            item.el.style.bottom = `${item.bottom}px`;
-          }
-        }
-      });
-    }
-
-    // Collectibles Check
-    for (let i = collectibles.length - 1; i >= 0; i--) {
-      const item = collectibles[i];
-      item.x += currentSpeed * delta;
-      item.el.style.right = `${item.x}px`;
-
-      const itemRect = item.el.getBoundingClientRect();
-      if (
-        dinoHitBox.right > itemRect.left &&
-        dinoHitBox.left < itemRect.right &&
-        dinoHitBox.bottom > itemRect.top &&
-        dinoHitBox.top < itemRect.bottom
-      ) {
-        const boardRect = gameBoard.getBoundingClientRect();
-        const fxX = itemRect.left - boardRect.left + itemRect.width / 2;
-        const fxY = itemRect.top - boardRect.top + itemRect.height / 2;
-
-        if (item.type === 'coin') {
-          const coinVal = inventory.double_coins ? 2 : 1;
-          runCoins += coinVal;
-          totalCoins += coinVal;
-          score += 15 * coinVal;
-          coinDisplay.textContent = totalCoins;
-          saveUserData();
-          AudioController.playCoin();
-          addParticles(fxX, fxY, 12, '#fde047', 4);
-        } else {
-          activatePowerup(item.type);
-          addParticles(fxX, fxY, 20, item.type === 'shield' ? '#38bdf8' : '#f59e0b', 5);
-        }
-
-        item.el.remove();
-        collectibles.splice(i, 1);
-        continue;
-      }
-
-      if (item.x > gameBoard.clientWidth + 60) {
-        item.el.remove();
-        collectibles.splice(i, 1);
-      }
-    }
-
-    // Move Obstacles & Collision Check
-    for (let i = obstacles.length - 1; i >= 0; i--) {
-      const obs = obstacles[i];
-      obs.x += currentSpeed * delta;
-      obs.el.style.right = `${obs.x}px`;
-
-      if (obs.type === 'pterodactyl') {
-        obs.wingTimer = (obs.wingTimer || 0) + delta;
-        if (obs.wingTimer >= 9) {
-          obs.wingTimer = 0;
-          obs.el.classList.toggle('wing-up');
-        }
-      }
-
-      const obsRect = obs.el.getBoundingClientRect();
-      const obsHitBox = {
-        left: obsRect.left + 6,
-        right: obsRect.right - 6,
-        top: obsRect.top + 5,
-        bottom: obsRect.bottom - 2
-      };
-
-      if (
-        dinoHitBox.right > obsHitBox.left &&
-        dinoHitBox.left < obsHitBox.right &&
-        dinoHitBox.bottom > obsHitBox.top &&
-        dinoHitBox.top < obsHitBox.bottom
-      ) {
-        if (activePowerup === 'shield') {
-          activePowerup = null;
-          powerupStatus.classList.add('hidden');
-          dino.classList.remove('has-shield');
-
-          const boardRect = gameBoard.getBoundingClientRect();
-          addParticles(obsRect.left - boardRect.left + 20, obsRect.top - boardRect.top + 20, 25, '#38bdf8', 6);
-
-          obs.el.remove();
-          obstacles.splice(i, 1);
-          continue;
-        } else if (hasReviveAvailable) {
-          // Extra Life Revive triggered!
-          hasReviveAvailable = false;
-          AudioController.playPowerup();
-
-          const boardRect = gameBoard.getBoundingClientRect();
-          addParticles(dinoRect.left - boardRect.left + 35, dinoRect.top - boardRect.top + 20, 30, '#ec4899', 6);
-
-          // Clear nearby obstacles
-          obs.el.remove();
-          obstacles.splice(i, 1);
-
-          // Grant temporary shield bubble
-          activatePowerup('shield');
-          continue;
-        } else {
-          triggerGameOver();
-          break;
-        }
-      }
-
-      if (obs.x > gameBoard.clientWidth + 90) {
-        obs.el.remove();
-        obstacles.splice(i, 1);
-      }
-    }
-
-    // 7. Powerup countdown
-    if (activePowerup) {
-      powerupDuration -= delta;
-      const pct = Math.max(0, (powerupDuration / powerupMaxDuration) * 100);
-      powerupBar.style.width = `${pct}%`;
-
-      if (powerupDuration <= 0) {
-        activePowerup = null;
-        powerupStatus.classList.add('hidden');
-        dino.classList.remove('has-shield');
-      }
-    }
-
-    // 8. Score progression
-    const scoreRate = activePowerup === 'star-boost' ? 0.3 * delta : 0.15 * delta;
-    score += scoreRate;
-    const currentScoreInt = Math.floor(score);
-    scoreDisplay.textContent = String(currentScoreInt).padStart(5, '0');
-
-    if (currentScoreInt >= 100 && Math.floor(currentScoreInt / 100) > lastMilestone) {
-      lastMilestone = Math.floor(currentScoreInt / 100);
-      AudioController.playScore();
-      scoreContainer.classList.remove('flashing-score');
-      void scoreContainer.offsetWidth;
-      scoreContainer.classList.add('flashing-score');
-
-      if (gameSpeed < maxSpeed) {
-        gameSpeed += 0.45;
-      }
-    }
-
-    // Day / Night cycle
-    const shouldBeNight = Math.floor(currentScoreInt / 400) % 2 === 1;
-    if (shouldBeNight !== isNight) {
-      isNight = shouldBeNight;
-      document.body.classList.toggle('night-mode', isNight);
-    }
-  }
-
-  updateParticles(delta);
-
-  requestAnimationFrame(gameLoop);
-}
-
-function triggerGameOver() {
-  isGameOver = true;
-  AudioController.playHit();
-  dino.className = `crashed skin-${currentSkin}`;
-  gameOverScreen.classList.remove('hidden');
-
-  const boardRect = gameBoard.getBoundingClientRect();
-  const dinoRect = dino.getBoundingClientRect();
-  addParticles(dinoRect.left - boardRect.left + 35, dinoRect.top - boardRect.top + 25, 30, '#ef4444', 6);
-
-  saveUserData();
-
-  const finalScore = Math.floor(score);
-  if (finalScore > highScore) {
-    highScore = finalScore;
-    highScoreDisplay.textContent = String(highScore).padStart(5, '0');
+  playBallRumble(speed) {
+    if (!this.ctx) return;
     try {
-      localStorage.setItem('dino_jurassic_hi', highScore);
-    } catch (e) {}
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      const filter = this.ctx.createBiquadFilter();
+      
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(140 + speed * 180, this.ctx.currentTime);
+
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(320 + speed * 400, this.ctx.currentTime);
+
+      gain.gain.setValueAtTime(0.04 * Math.min(speed * 3, 1), this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.masterGain);
+
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.05);
+    } catch(e) {}
   }
+
+  playBallBounce(intensity = 1) {
+    if (!this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1800 + Math.random() * 400, t);
+      osc.frequency.exponentialRampToValueAtTime(350, t + 0.04);
+
+      gain.gain.setValueAtTime(0.25 * intensity, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+
+      osc.connect(gain);
+      gain.connect(this.masterGain);
+      osc.start(t);
+      osc.stop(t + 0.04);
+
+      const knock = this.ctx.createOscillator();
+      const kGain = this.ctx.createGain();
+      knock.type = 'triangle';
+      knock.frequency.setValueAtTime(220, t);
+      knock.frequency.exponentialRampToValueAtTime(60, t + 0.05);
+      kGain.gain.setValueAtTime(0.18 * intensity, t);
+      kGain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+      knock.connect(kGain);
+      kGain.connect(this.masterGain);
+      knock.start(t);
+      knock.stop(t + 0.05);
+    } catch(e) {}
+  }
+
+  playCookieCrack() {
+    if (!this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+      const bufferSize = this.ctx.sampleRate * 0.18;
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx.sampleRate * 0.035));
+      }
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = buffer;
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.value = 1800;
+      filter.Q.value = 4;
+      const gain = this.ctx.createGain();
+      gain.gain.setValueAtTime(0.45, t);
+      gain.gain.exponentialRampToValueAtTime(0.01, t + 0.18);
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.masterGain);
+      noise.start(t);
+    } catch(e) {}
+  }
+
+  playCoinSound() {
+    if (!this.ctx) return;
+    try {
+      const freqs = [987.77, 1318.51]; // B5 to E6 chime
+      freqs.forEach((f, idx) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(f, this.ctx.currentTime + idx * 0.07);
+        gain.gain.setValueAtTime(0.15, this.ctx.currentTime + idx * 0.07);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.07 + 0.25);
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start(this.ctx.currentTime + idx * 0.07);
+        osc.stop(this.ctx.currentTime + idx * 0.07 + 0.25);
+      });
+    } catch(e) {}
+  }
+
+  playJackpot() {
+    if (!this.ctx) return;
+    try {
+      const notes = [440, 554.37, 659.25, 880, 1108.73];
+      notes.forEach((freq, idx) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.09);
+        gain.gain.setValueAtTime(0.18, this.ctx.currentTime + idx * 0.09);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.09 + 0.6);
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start(this.ctx.currentTime + idx * 0.09);
+        osc.stop(this.ctx.currentTime + idx * 0.09 + 0.6);
+      });
+    } catch(e) {}
+  }
+}
+const audio = new CasinoAudioEngine();
+
+// 4. DOM Elements
+const canvas = document.getElementById('roulette-canvas');
+const ctx = canvas.getContext('2d');
+const spinBtn = document.getElementById('spin-btn');
+const crackBtn = document.getElementById('crack-btn');
+const resetBtn = document.getElementById('reset-btn');
+const historyToggleBtn = document.getElementById('history-toggle-btn');
+const closeHistoryBtn = document.getElementById('close-history-btn');
+const historyDrawer = document.getElementById('history-drawer');
+const historyList = document.getElementById('history-list');
+const historyCount = document.getElementById('history-count');
+const statusText = document.getElementById('status-text');
+const statusIndicator = document.querySelector('.status-indicator');
+const categoryBadge = document.getElementById('category-badge');
+const cookieStage = document.getElementById('cookie-stage');
+const cookieContainer = document.getElementById('cookie-container');
+const cookiePrompt = document.getElementById('cookie-prompt');
+const slipCategory = document.getElementById('slip-category');
+const slipText = document.getElementById('slip-text');
+const luckyNumbersEl = document.getElementById('lucky-numbers');
+const luckyScoreEl = document.getElementById('lucky-score');
+const slipCoinReward = document.getElementById('slip-coin-reward');
+const slipMultiplier = document.getElementById('slip-multiplier');
+const turretCenter = document.getElementById('turret-centerpiece');
+
+// Economy & Quest DOM
+const userCoinsEl = document.getElementById('user-coins');
+const claimDailyBtn = document.getElementById('claim-daily-btn');
+const betChipBtns = document.querySelectorAll('.bet-chip-btn');
+const questHudToggle = document.getElementById('quest-hud-toggle');
+const questBtn = document.getElementById('quest-btn');
+const questsDrawer = document.getElementById('quests-drawer');
+const closeQuestsBtn = document.getElementById('close-quests-btn');
+const questsContainer = document.getElementById('quests-container');
+const questCompletedCount = document.getElementById('quest-completed-count');
+
+// 5. Update Coin Display & Storage
+function updateCoinDisplay() {
+  userCoinsEl.textContent = playerEconomy.coins.toLocaleString();
+}
+
+// 6. Quests Engine
+function updateQuests() {
+  let completed = 0;
+  casinoQuests.forEach(q => {
+    q.current = q.checkProgress(playerEconomy);
+    if (q.current >= q.target) {
+      q.isCompleted = true;
+    }
+    if (q.isClaimed) {
+      completed++;
+    }
+  });
+
+  questCompletedCount.textContent = `${completed} / ${casinoQuests.length} Complete`;
+  renderQuests();
+}
+
+function renderQuests() {
+  questsContainer.innerHTML = casinoQuests.map(q => {
+    const pct = Math.min(100, Math.round((q.current / q.target) * 100));
+    let actionBtnHtml = '';
+    
+    if (q.isClaimed) {
+      actionBtnHtml = `<span class="claimed-badge">✓ Claimed</span>`;
+    } else if (q.isCompleted) {
+      actionBtnHtml = `<button class="claim-quest-btn" onclick="claimQuestReward('${q.id}')">Claim +${q.rewardCoins} 🪙</button>`;
+    } else {
+      actionBtnHtml = `<span>${q.current} / ${q.target}</span>`;
+    }
+
+    return `
+      <div class="quest-card ${q.isCompleted ? 'completed' : ''}">
+        <div class="quest-top">
+          <span class="quest-title">${q.title}</span>
+          <span class="quest-reward-tag">+${q.rewardCoins} 🪙</span>
+        </div>
+        <p class="quest-desc">${q.desc}</p>
+        <div class="quest-progress-bar-bg">
+          <div class="quest-progress-fill" style="width: ${pct}%"></div>
+        </div>
+        <div class="quest-bottom">
+          <span>Progress: ${pct}%</span>
+          ${actionBtnHtml}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+window.claimQuestReward = function(questId) {
+  const q = casinoQuests.find(item => item.id === questId);
+  if (q && q.isCompleted && !q.isClaimed) {
+    q.isClaimed = true;
+    playerEconomy.coins += q.rewardCoins;
+    audio.playCoinSound();
+    triggerCasinoConfetti();
+    updateCoinDisplay();
+    updateQuests();
+  }
+};
+
+// 7. Bet Selection Logic
+betChipBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const betVal = parseInt(btn.dataset.bet, 10);
+    playerEconomy.currentBet = betVal;
+    betChipBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    audio.playCoinSound();
+  });
+});
+
+// Daily / Free Coin Bonus
+claimDailyBtn.addEventListener('click', () => {
+  playerEconomy.coins += 100;
+  audio.playCoinSound();
+  updateCoinDisplay();
+  claimDailyBtn.textContent = 'Claimed!';
+  claimDailyBtn.disabled = true;
+  setTimeout(() => {
+    claimDailyBtn.textContent = '🎁 +100';
+    claimDailyBtn.disabled = false;
+  }, 10000); // 10s cooldown
+});
+
+// 8. 4K Ultra-Realistic Roulette Physics & Canvas
+const numPockets = CASINO_POCKETS.length;
+const arc = (2 * Math.PI) / numPockets;
+
+const gameState = {
+  wheelAngle: 0,
+  wheelSpeed: 0,
+  ballAngle: 0,
+  ballSpeed: 0,
+  ballRadius: 420,
+  ballInPocket: false,
+  isSpinning: false,
+  readyToCrack: false,
+  cracked: false,
+  selectedPocket: null,
+  potentialCoinWin: 0
+};
+
+const CX = 500;
+const CY = 500;
+const POCKET_OUTER = 440;
+const POCKET_INNER = 330;
+
+function renderWheel() {
+  ctx.clearRect(0, 0, 1000, 1000);
+
+  // Outer Brass Deflector Track & Frets
+  const trackGrad = ctx.createRadialGradient(CX, CY, 440, CX, CY, 495);
+  trackGrad.addColorStop(0, '#5a3d07');
+  trackGrad.addColorStop(0.3, '#d4af37');
+  trackGrad.addColorStop(0.6, '#ffd966');
+  trackGrad.addColorStop(0.85, '#855e0f');
+  trackGrad.addColorStop(1, '#2b1a03');
+
+  ctx.beginPath();
+  ctx.arc(CX, CY, 485, 0, Math.PI * 2);
+  ctx.arc(CX, CY, 440, 0, Math.PI * 2, true);
+  ctx.fillStyle = trackGrad;
+  ctx.fill();
+
+  // 8 Diamond Brass Ball Deflectors along the track
+  for (let d = 0; d < 8; d++) {
+    const dAngle = (d * Math.PI * 2) / 8;
+    const dx = CX + 462 * Math.cos(dAngle);
+    const dy = CY + 462 * Math.sin(dAngle);
+    ctx.save();
+    ctx.translate(dx, dy);
+    ctx.rotate(dAngle + Math.PI / 4);
+    ctx.fillStyle = '#fff4bd';
+    ctx.shadowColor = '#000';
+    ctx.shadowBlur = 6;
+    ctx.fillRect(-6, -6, 12, 12);
+    ctx.restore();
+  }
+
+  // Rotating Rotor Cylinder
+  ctx.save();
+  ctx.translate(CX, CY);
+  ctx.rotate(gameState.wheelAngle);
+  ctx.translate(-CX, -CY);
+
+  const rimGrad = ctx.createRadialGradient(CX, CY, 420, CX, CY, 442);
+  rimGrad.addColorStop(0, '#855e0f');
+  rimGrad.addColorStop(0.5, '#ffd966');
+  rimGrad.addColorStop(1, '#5a3d07');
+  ctx.beginPath();
+  ctx.arc(CX, CY, 442, 0, Math.PI * 2);
+  ctx.arc(CX, CY, 436, 0, Math.PI * 2, true);
+  ctx.fillStyle = rimGrad;
+  ctx.fill();
+
+  // Draw Pockets
+  for (let i = 0; i < numPockets; i++) {
+    const p = CASINO_POCKETS[i];
+    const startAngle = i * arc;
+    const endAngle = startAngle + arc;
+
+    ctx.beginPath();
+    ctx.moveTo(CX, CY);
+    ctx.arc(CX, CY, POCKET_OUTER, startAngle, endAngle);
+    ctx.closePath();
+    
+    const pocketGrad = ctx.createRadialGradient(CX, CY, POCKET_INNER, CX, CY, POCKET_OUTER);
+    if (p.type === 'red') {
+      pocketGrad.addColorStop(0, '#660812');
+      pocketGrad.addColorStop(0.7, '#c71828');
+      pocketGrad.addColorStop(1, '#e62e3d');
+    } else if (p.type === 'black') {
+      pocketGrad.addColorStop(0, '#0d0d0d');
+      pocketGrad.addColorStop(0.7, '#1f1f1f');
+      pocketGrad.addColorStop(1, '#333333');
+    } else {
+      pocketGrad.addColorStop(0, '#04421b');
+      pocketGrad.addColorStop(0.7, '#088a3a');
+      pocketGrad.addColorStop(1, '#11b852');
+    }
+    ctx.fillStyle = pocketGrad;
+    ctx.fill();
+
+    // Brass Frets
+    ctx.beginPath();
+    ctx.moveTo(
+      CX + POCKET_INNER * Math.cos(startAngle),
+      CY + POCKET_INNER * Math.sin(startAngle)
+    );
+    ctx.lineTo(
+      CX + POCKET_OUTER * Math.cos(startAngle),
+      CY + POCKET_OUTER * Math.sin(startAngle)
+    );
+    ctx.lineWidth = 3.5;
+    ctx.strokeStyle = '#ffd966';
+    ctx.stroke();
+
+    // Labels inside pocket
+    ctx.save();
+    ctx.translate(CX, CY);
+    ctx.rotate(startAngle + arc / 2);
+    ctx.textAlign = 'center';
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 24px "Cinzel", serif';
+    ctx.shadowColor = '#000000';
+    ctx.shadowBlur = 5;
+    ctx.fillText(p.num, POCKET_OUTER - 32, 8);
+
+    ctx.font = '16px "Nunito", sans-serif';
+    ctx.fillStyle = '#ffdf7e';
+    ctx.fillText(p.icon, POCKET_OUTER - 64, 6);
+
+    ctx.restore();
+  }
+
+  // Inner Cone
+  const coneGrad = ctx.createRadialGradient(CX, CY, 50, CX, CY, POCKET_INNER);
+  coneGrad.addColorStop(0, '#ffffff');
+  coneGrad.addColorStop(0.2, '#ffd700');
+  coneGrad.addColorStop(0.5, '#996f0e');
+  coneGrad.addColorStop(0.85, '#402903');
+  coneGrad.addColorStop(1, '#1a1001');
+
+  ctx.beginPath();
+  ctx.arc(CX, CY, POCKET_INNER, 0, Math.PI * 2);
+  ctx.fillStyle = coneGrad;
+  ctx.fill();
+
+  ctx.restore();
+
+  drawIvoryBall();
+}
+
+function drawIvoryBall() {
+  const bx = CX + gameState.ballRadius * Math.cos(gameState.ballAngle);
+  const by = CY + gameState.ballRadius * Math.sin(gameState.ballAngle);
+
+  ctx.beginPath();
+  ctx.arc(bx + 4, by + 6, 12, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+  ctx.fill();
+
+  const ballGrad = ctx.createRadialGradient(bx - 3, by - 4, 1.5, bx, by, 12);
+  ballGrad.addColorStop(0, '#ffffff');
+  ballGrad.addColorStop(0.3, '#f5f5f5');
+  ballGrad.addColorStop(0.7, '#d6d3ce');
+  ballGrad.addColorStop(0.95, '#8c8883');
+  ballGrad.addColorStop(1, '#474542');
+
+  ctx.beginPath();
+  ctx.arc(bx, by, 11, 0, Math.PI * 2);
+  ctx.fillStyle = ballGrad;
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(bx - 4, by - 4, 3, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+  ctx.fill();
+}
+
+// 9. Casino Spin Mechanics with Coin Betting
+let lastFretTick = -1;
+let rumbleTimer = 0;
+
+function startCasinoSpin() {
+  if (gameState.isSpinning) return;
+
+  // Check if player has enough coins
+  if (playerEconomy.coins < playerEconomy.currentBet) {
+    alert(`Not enough coins! You need ${playerEconomy.currentBet} coins to spin. Claim the free +100 bonus above!`);
+    return;
+  }
+
+  audio.init();
+
+  // Deduct Bet from Vault
+  playerEconomy.coins -= playerEconomy.currentBet;
+  updateCoinDisplay();
+
+  // Track Quest Progress
+  playerEconomy.stats.totalSpins++;
+  if (playerEconomy.currentBet >= 100) {
+    playerEconomy.stats.highStakeSpins++;
+  }
+  updateQuests();
+
+  gameState.isSpinning = true;
+  gameState.readyToCrack = false;
+  gameState.cracked = false;
+  gameState.ballInPocket = false;
+
+  spinBtn.disabled = true;
+  crackBtn.disabled = true;
+
+  statusIndicator.classList.add('spinning');
+  statusText.innerHTML = `BET PLACED: -${playerEconomy.currentBet} 🪙 | Ball in play...`;
+  categoryBadge.textContent = 'Spinning in Progress...';
+  categoryBadge.classList.remove('highlight');
+  cookieStage.classList.remove('ready');
+  cookieContainer.classList.remove('cracked');
+  cookiePrompt.innerHTML = '✨ Watch the ball dance across the brass frets...';
+
+  gameState.wheelSpeed = 0.05 + Math.random() * 0.02;
+  gameState.ballRadius = 462;
+  gameState.ballSpeed = -(0.24 + Math.random() * 0.06);
+
+  let phase = 'rim';
+  let bounceCount = 0;
+  const maxBounces = 4 + Math.floor(Math.random() * 4);
+
+  function physicsLoop() {
+    gameState.wheelAngle = (gameState.wheelAngle + gameState.wheelSpeed) % (Math.PI * 2);
+    gameState.wheelSpeed *= 0.9985;
+
+    if (turretCenter) {
+      turretCenter.style.transform = `translate(-50%, -50%) rotate(${gameState.wheelAngle}rad)`;
+    }
+
+    if (phase === 'rim') {
+      gameState.ballAngle = (gameState.ballAngle + gameState.ballSpeed) % (Math.PI * 2);
+      gameState.ballSpeed *= 0.989;
+
+      rumbleTimer++;
+      if (rumbleTimer % 4 === 0) {
+        audio.playBallRumble(Math.abs(gameState.ballSpeed));
+      }
+
+      if (Math.abs(gameState.ballSpeed) < 0.09) {
+        phase = 'drop';
+      }
+    } else if (phase === 'drop') {
+      gameState.ballAngle = (gameState.ballAngle + gameState.ballSpeed) % (Math.PI * 2);
+      gameState.ballSpeed *= 0.982;
+      gameState.ballRadius -= 2.8;
+
+      if (gameState.ballRadius <= 385) {
+        phase = 'bounce';
+      }
+    } else if (phase === 'bounce') {
+      gameState.ballAngle = (gameState.ballAngle + gameState.ballSpeed) % (Math.PI * 2);
+      
+      const relativeAngle = ((gameState.ballAngle - gameState.wheelAngle) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+      const currentFret = Math.floor(relativeAngle / arc);
+
+      if (currentFret !== lastFretTick) {
+        audio.playBallBounce(0.9 - (bounceCount * 0.1));
+        lastFretTick = currentFret;
+        bounceCount++;
+        gameState.ballRadius = 385 + (Math.random() * 12 - 6);
+        gameState.ballSpeed *= 0.94;
+      }
+
+      if (bounceCount >= maxBounces && Math.abs(gameState.ballSpeed - gameState.wheelSpeed) < 0.015) {
+        phase = 'settled';
+        gameState.ballInPocket = true;
+      }
+    } else if (phase === 'settled') {
+      const finalRelativeAngle = ((gameState.ballAngle - gameState.wheelAngle) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+      const winningIndex = Math.floor(finalRelativeAngle / arc) % numPockets;
+
+      const pocketCenterRel = winningIndex * arc + arc / 2;
+      gameState.ballAngle = gameState.wheelAngle + pocketCenterRel;
+      gameState.ballRadius = 380;
+
+      renderWheel();
+      onBallSettled(winningIndex);
+      return;
+    }
+
+    renderWheel();
+    requestAnimationFrame(physicsLoop);
+  }
+
+  requestAnimationFrame(physicsLoop);
+}
+
+// 10. Ball Settled: Calculate Coin Payouts
+function onBallSettled(pocketIndex) {
+  const winner = CASINO_POCKETS[pocketIndex];
+  gameState.selectedPocket = winner;
+  gameState.isSpinning = false;
+  gameState.readyToCrack = true;
+
+  // Track Quest Colors
+  if (winner.type === 'red') playerEconomy.stats.redHits++;
+  else if (winner.type === 'black') playerEconomy.stats.blackHits++;
+  else if (winner.type === 'green') playerEconomy.stats.greenHits++;
+  updateQuests();
+
+  // Calculate Coin Reward (1 to 1000+ depending on bet and multiplier)
+  const baseReward = Math.round(playerEconomy.currentBet * winner.mult);
+  // Add a random fortune lucky bonus (1 to 50 coins)
+  const bonusLuckyCoins = Math.floor(Math.random() * 50) + 1;
+  gameState.potentialCoinWin = Math.min(1000, baseReward + bonusLuckyCoins);
+
+  statusIndicator.classList.remove('spinning');
+  statusText.innerHTML = `BALL SETTLED: Pocket <strong style="color: ${winner.type === 'red' ? '#ff4d6d' : (winner.type === 'green' ? '#00ff88' : '#e0e0e0')}">${winner.num}</strong>! Payout Ready: +${gameState.potentialCoinWin} 🪙!`;
+  
+  categoryBadge.textContent = `${winner.num} ${winner.icon} ${winner.category}`;
+  categoryBadge.classList.add('highlight');
+
+  cookieStage.classList.add('ready');
+  crackBtn.disabled = false;
+  spinBtn.disabled = false;
+  cookiePrompt.innerHTML = `👉 <strong>CRACK YOUR COOKIE</strong> to claim your +${gameState.potentialCoinWin} 🪙!`;
+
+  audio.playJackpot();
+}
+
+// 11. Cookie Cracking & Coin Deposit
+function crackCookie() {
+  if (!gameState.readyToCrack || gameState.cracked) return;
+
+  gameState.cracked = true;
+  audio.playCookieCrack();
+
+  // Deposit won coins into Vault
+  playerEconomy.coins += gameState.potentialCoinWin;
+  playerEconomy.stats.coinsWon += gameState.potentialCoinWin;
+  playerEconomy.stats.totalCracked++;
+  updateCoinDisplay();
+  updateQuests();
+
+  const pocket = gameState.selectedPocket;
+  const fortunes = FORTUNES_DATA[pocket.category] || FORTUNES_DATA['Wisdom & Mind'];
+  const fortuneText = fortunes[Math.floor(Math.random() * fortunes.length)];
+
+  const luckySet = new Set();
+  luckySet.add(pocket.num.padStart(2, '0'));
+  while (luckySet.size < 4) {
+    const r = Math.floor(Math.random() * 36) + 1;
+    luckySet.add(r.toString().padStart(2, '0'));
+  }
+  const luckyString = Array.from(luckySet).join(', ');
+  const starScore = '★'.repeat(pocket.type === 'green' ? 6 : (pocket.type === 'red' ? 5 : 4));
+
+  // Populate Fortune Slip with Coin Payout
+  slipCategory.textContent = `POCKET ${pocket.num} • ${pocket.icon} ${pocket.category}`;
+  slipText.textContent = `"${fortuneText}"`;
+  slipCoinReward.textContent = gameState.potentialCoinWin;
+  slipMultiplier.textContent = `x${pocket.mult} Multiplier`;
+  luckyNumbersEl.textContent = `Lucky Numbers: ${luckyString}`;
+  luckyScoreEl.textContent = `Payout Luck: ${starScore}`;
+
+  cookieContainer.classList.add('cracked');
+  cookiePrompt.innerHTML = `👑 Credited +${gameState.potentialCoinWin} Coins to your Vault!`;
+  crackBtn.disabled = true;
+
+  audio.playCoinSound();
+  triggerCasinoConfetti();
+
+  saveFortuneRecord({
+    pocket: pocket.num,
+    type: pocket.type,
+    category: pocket.category,
+    icon: pocket.icon,
+    fortune: fortuneText,
+    rewardCoins: gameState.potentialCoinWin,
+    numbers: luckyString,
+    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  });
 }
 
 function resetGame() {
-  obstacles.forEach((o) => o.el.remove());
-  obstacles = [];
-  collectibles.forEach((c) => c.el.remove());
-  collectibles = [];
-  clouds.forEach((c) => c.el.remove());
-  clouds = [];
-  particles = [];
+  gameState.readyToCrack = false;
+  gameState.cracked = false;
+  gameState.selectedPocket = null;
+  gameState.potentialCoinWin = 0;
 
-  isGameOver = false;
-  isJumping = false;
-  jumpCount = 0;
-  isDucking = false;
-  isRoaring = false;
-  dinoY = 0;
-  dinoVelocity = 0;
-  score = 0;
-  runCoins = 0;
-  lastMilestone = 0;
-  gameSpeed = 6.2;
-  distanceSinceLastSpawn = 0;
-  isNight = false;
-  activePowerup = null;
-
-  document.body.classList.remove('night-mode');
-  powerupStatus.classList.add('hidden');
-  roarBanner.classList.add('hidden');
-  dino.classList.remove('has-shield');
-  scoreContainer.classList.remove('flashing-score');
-
-  // Apply purchased Starter Shield if owned
-  if (inventory.starter_shield) {
-    activatePowerup('shield');
-  }
-
-  // Restore extra life revive if owned
-  hasReviveAvailable = !!inventory.extra_revive;
-
-  dino.className = `running skin-${currentSkin}`;
-  dino.style.bottom = '0px';
-  scoreDisplay.textContent = '00000';
-  gameOverScreen.classList.add('hidden');
+  cookieContainer.classList.remove('cracked');
+  cookieStage.classList.remove('ready');
+  categoryBadge.classList.remove('highlight');
+  categoryBadge.textContent = 'Awaiting Ball Landing...';
+  statusText.innerHTML = 'BALL READY: Select a bet & tap <strong>SPIN</strong>!';
+  cookiePrompt.innerHTML = '▾ Place bets and spin the wheel!';
+  crackBtn.disabled = true;
+  spinBtn.disabled = false;
 }
 
-// ==========================================
-// CONTROLS & LISTENERS
-// ==========================================
-window.addEventListener('keydown', (e) => {
-  if (e.code === 'Escape' && isShopOpen) {
-    closeShop();
+// 12. History Records
+const historyRecords = [];
+function saveFortuneRecord(item) {
+  historyRecords.unshift(item);
+  historyCount.textContent = historyRecords.length;
+  renderHistory();
+}
+
+function renderHistory() {
+  if (historyRecords.length === 0) {
+    historyList.innerHTML = '<p class="empty-history">No winning fortunes recorded yet.</p>';
     return;
   }
-  if (isShopOpen) return;
 
-  if (e.code === 'Space' || e.code === 'ArrowUp') {
-    e.preventDefault();
-    jump();
-  } else if (e.code === 'ArrowDown') {
-    e.preventDefault();
-    setDucking(true);
-  } else if (e.code === 'KeyR') {
-    e.preventDefault();
-    roar();
-  }
-});
-
-window.addEventListener('keyup', (e) => {
-  if (e.code === 'ArrowDown') {
-    setDucking(false);
-  }
-});
-
-gameBoard.addEventListener('pointerdown', (e) => {
-  if (isShopOpen) return;
-  const rect = gameBoard.getBoundingClientRect();
-  const touchY = e.clientY - rect.top;
-  if (touchY < rect.height * 0.6) {
-    jump();
-  } else {
-    setDucking(true);
-  }
-});
-
-window.addEventListener('pointerup', () => {
-  if (isDucking) setDucking(false);
-});
-
-touchJumpBtn.addEventListener('pointerdown', (e) => {
-  e.preventDefault();
-  jump();
-});
-
-touchDuckBtn.addEventListener('pointerdown', (e) => {
-  e.preventDefault();
-  setDucking(true);
-});
-
-touchDuckBtn.addEventListener('pointerup', (e) => {
-  e.preventDefault();
-  setDucking(false);
-});
-
-touchRoarBtn.addEventListener('pointerdown', (e) => {
-  e.preventDefault();
-  roar();
-});
-
-restartBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  resetGame();
-});
-
-muteBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  const isMuted = AudioController.toggleMute();
-  muteBtn.textContent = isMuted ? '🔇 Sound: OFF' : '🔊 Sound: ON';
-});
-
-// Boot loop with Starter Shield check
-if (inventory.starter_shield) {
-  activatePowerup('shield');
+  historyList.innerHTML = historyRecords.map(r => `
+    <div class="history-card">
+      <div class="h-cat">${r.icon} Pocket ${r.pocket} (${r.type.toUpperCase()}) — ${r.category}</div>
+      <div class="h-reward">🪙 Won +${r.rewardCoins} Coins</div>
+      <div class="h-text">"${r.fortune}"</div>
+      <div class="h-time">Lucky Nos: ${r.numbers} • ${r.time}</div>
+    </div>
+  `).join('');
 }
-hasReviveAvailable = !!inventory.extra_revive;
 
-requestAnimationFrame(gameLoop);
+// 13. Confetti Particles
+const confettiCanvas = document.getElementById('confetti-canvas');
+const confettiCtx = confettiCanvas.getContext('2d');
+let confettiParticles = [];
+let confettiFrame = null;
+
+function resizeConfetti() {
+  confettiCanvas.width = window.innerWidth;
+  confettiCanvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeConfetti);
+resizeConfetti();
+
+function triggerCasinoConfetti() {
+  confettiParticles = [];
+  const palette = ['#ffd700', '#ffea80', '#e63946', '#00ff88', '#ffffff', '#c71828'];
+
+  for (let i = 0; i < 110; i++) {
+    confettiParticles.push({
+      x: window.innerWidth * 0.7,
+      y: window.innerHeight * 0.5,
+      vx: (Math.random() - 0.5) * 16,
+      vy: (Math.random() - 1.3) * 14,
+      size: Math.random() * 9 + 4,
+      color: palette[Math.floor(Math.random() * palette.length)],
+      rot: Math.random() * 360,
+      vRot: (Math.random() - 0.5) * 10,
+      alpha: 1,
+      decay: 0.007 + Math.random() * 0.008
+    });
+  }
+
+  if (confettiFrame) cancelAnimationFrame(confettiFrame);
+
+  function confettiLoop() {
+    confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    let active = false;
+
+    confettiParticles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.28;
+      p.rot += p.vRot;
+      p.alpha -= p.decay;
+
+      if (p.alpha > 0) {
+        active = true;
+        confettiCtx.save();
+        confettiCtx.translate(p.x, p.y);
+        confettiCtx.rotate((p.rot * Math.PI) / 180);
+        confettiCtx.globalAlpha = Math.max(0, p.alpha);
+        confettiCtx.fillStyle = p.color;
+        confettiCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+        confettiCtx.restore();
+      }
+    });
+
+    if (active) {
+      confettiFrame = requestAnimationFrame(confettiLoop);
+    } else {
+      confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    }
+  }
+
+  confettiLoop();
+}
+
+// 14. Event Listeners & Initializers
+spinBtn.addEventListener('click', startCasinoSpin);
+crackBtn.addEventListener('click', crackCookie);
+cookieContainer.addEventListener('click', crackCookie);
+resetBtn.addEventListener('click', resetGame);
+
+// Quests Drawer Toggle
+questHudToggle.addEventListener('click', () => {
+  questsDrawer.classList.toggle('open');
+});
+
+questBtn.addEventListener('click', () => {
+  questsDrawer.classList.toggle('open');
+});
+
+closeQuestsBtn.addEventListener('click', () => {
+  questsDrawer.classList.remove('open');
+});
+
+historyToggleBtn.addEventListener('click', () => {
+  historyDrawer.classList.toggle('open');
+});
+
+closeHistoryBtn.addEventListener('click', () => {
+  historyDrawer.classList.remove('open');
+});
+
+// Initialization
+updateCoinDisplay();
+updateQuests();
+renderWheel();
